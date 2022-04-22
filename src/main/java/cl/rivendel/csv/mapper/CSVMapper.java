@@ -102,7 +102,7 @@ public abstract class CSVMapper {
                 .append(P_OPENING)
                 .append(card.getOracleText().replace("\n", "").replace("\r", ""))
                 .append(P_CLOSING);
-        if (card.getTypeLine().equalsIgnoreCase(CREATURE)) {
+        if (card.getTypeLine().contains(CREATURE)) {
             sb.append(P_OPENING)
                     .append(card.getPower())
                     .append("/")
