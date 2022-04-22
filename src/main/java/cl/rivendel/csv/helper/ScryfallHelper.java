@@ -30,7 +30,7 @@ public class ScryfallHelper {
 
     private static final Logger log = LoggerFactory.getLogger(ScryfallHelper.class);
 
-    private static final String ORACLE_CARDS_FOLDER = "./oracleCards/";
+    private static final String ORACLE_CARDS_FOLDER = "C:\\SimpleSolution\\oracleCards\\";
 
     @Autowired
     private ScryfallClient scryfallClient;
@@ -58,24 +58,27 @@ public class ScryfallHelper {
     public List<String> getOracleCardsImages(List<Card> cardList) {
         List<String> downloadedCardsNames = new ArrayList<>();
         new File(ORACLE_CARDS_FOLDER).mkdir();
+        boolean skipHighRes = true;
         for (Card card : cardList) {
-            if (card.getImageStatus().equalsIgnoreCase("highres_scan") && card.getImageUris() !=null) {
-                try {
-                    ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(card.getImageUris().get("png")).openStream());
-                    String fileName = new StringBuffer().append(ORACLE_CARDS_FOLDER).append(card.getName().replace("/", "-")).append("-").append(card.getSet()).append(".png").toString();
-                    FileOutputStream fileOutputStream = new FileOutputStream(fileName);
-                    fileOutputStream.getChannel()
-                            .transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-                    downloadedCardsNames.add(fileName);
-                } catch (IOException ioException) {
-                    log.error("IoException while downloading card image", ioException);
+            if (card.getImageUris() != null) {
+                if (skipHighRes || card.getImageStatus().equalsIgnoreCase("highres_scan")) {
+                    try {
+                        ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(card.getImageUris().get("png")).openStream());
+                        String fileName = new StringBuffer().append(ORACLE_CARDS_FOLDER).append(card.getName().replace("/", "-")).append("-").append(card.getSet()).append(".png").toString();
+                        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+                        fileOutputStream.getChannel()
+                                .transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+                        downloadedCardsNames.add(fileName);
+                    } catch (IOException ioException) {
+                        log.error("IoException while downloading card image", ioException);
+                    }
                 }
             }
         }
         return downloadedCardsNames;
     }
 
-    public Map<String, String> getSets(){
+    public Map<String, String> getSets() {
         SetListObject sets = scryfallClient.getAllSets();
         return sets.getData().stream().collect(Collectors.toMap(Set::getCode, Set::getName));
     }

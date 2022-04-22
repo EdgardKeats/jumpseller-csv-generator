@@ -27,7 +27,7 @@ public class CSVGenerator {
     @Autowired
     private CSVHelper csvHelper;
 
-    private boolean createImages = false;
+    private boolean createImages = true;
 
     /**
      * Preliminary CSV generation for jumpseller
@@ -45,7 +45,7 @@ public class CSVGenerator {
             log.info("getting {} cards images", cardsList.size());
             List<String> cardNames = scryfallHelper.getOracleCardsImages(cardsList);
             log.info("processing card images");
-            List<String> jumpsellerImages = cardImageHelper.createJumpsellerImages(cardNames);
+            //List<String> jumpsellerImages = cardImageHelper.createJumpsellerImages(cardNames);
             log.info("uploading jumpseller images to image server");
 
             log.info("updating csv file with card images urls");
