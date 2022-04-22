@@ -47,14 +47,14 @@ public abstract class CSVMapper {
 
             @Mapping(constant = "Tipo de carta", target = "customFieldThreeLabel"),
             @Mapping(source = "card.typeLine", target = "customFieldThreeValue"),
-            @Mapping(constant = "selection", target = "customFieldThreeType"),
+            @Mapping(constant = "selection", target = "customFieldThreeType")
 
             //@Mapping(constant = "", target ="permalink"),
-            @Mapping(constant = "", target = "brand"),
-            @Mapping(constant = "", target = "barcode"),
-            @Mapping(constant = "", target = "images"),
-            @Mapping(constant = "", target = "sku"),
-            @Mapping(constant = "", target = "googleProductCategory")
+            //@Mapping(constant = "", target = "brand"),
+            //@Mapping(constant = "", target = "barcode"),
+            //@Mapping(constant = "", target = "images"),
+            //@Mapping(constant = "", target = "sku"),
+            //@Mapping(constant = "", target = "googleProductCategory")
     })
     public abstract CSVModel toCsvModel(Card card);
 
@@ -83,15 +83,13 @@ public abstract class CSVMapper {
     }
 
     public String generateCardName(Card card) {
-
-        StringBuffer sb = new StringBuffer();
-        return sb.append(card.getName())
-                .append(" #")
-                .append(String.format("%03d", Integer.parseInt(card.getCollectorNumber()))).toString();
+        return card.getName() +
+                " #" +
+                String.format("%03d", Integer.parseInt(card.getCollectorNumber()));
     }
 
     public String generateCardDescription(Card card) {
-        StringBuffer sb = new StringBuffer()
+        StringBuilder sb = new StringBuilder()
                 .append("<h1>")
                 .append(card.getName())
                 .append(card.getManaCost())
@@ -102,13 +100,21 @@ public abstract class CSVMapper {
                 .append(P_OPENING)
                 .append(card.getOracleText().replace("\n", "").replace("\r", ""))
                 .append(P_CLOSING);
-        if (card.getTypeLine().contains(CREATURE)) {
+        if (card.getTypeLine().toUpperCase().contains(CREATURE.toUpperCase())) {
             sb.append(P_OPENING)
                     .append(card.getPower())
                     .append("/")
                     .append(card.getToughness())
                     .append(P_CLOSING);
         }
+
+        if (card.getTypeLine().toUpperCase().contains("PLANESWALKER")){
+            sb.append(P_OPENING)
+                    .append("Loyalty: ")
+                    .append(card.getLoyalty())
+                    .append(P_CLOSING);
+        }
+
         return sb.append(P_OPENING)
                 .append("Illustrated by ")
                 .append("<a href='https://scryfall.com/search?q=a%3A%E2%80%9C")
