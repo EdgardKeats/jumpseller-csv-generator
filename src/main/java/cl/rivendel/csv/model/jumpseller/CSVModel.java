@@ -84,90 +84,77 @@ public class CSVModel {
     @CsvBindByName(column = "Price")
     private String price;
 
-    @CsvBindByPosition(position = 20)
-    @CsvBindByName(column = "VariantImage")
-    private String variantImage;
 
-    @CsvBindByPosition(position = 21)
+    @CsvBindByPosition(position = 20)
     @CsvBindByName(column = "Variant 1 Option Name")
     private String variantOneOptionName;
 
-    @CsvBindByPosition(position = 22)
+    @CsvBindByPosition(position = 21)
     @CsvBindByName(column = "Variant 1 Option Type")
     private String variantOneOptionType;
 
-    @CsvBindByPosition(position = 23)
+    @CsvBindByPosition(position = 22)
     @CsvBindByName(column = "Variant 1 Option Value")
     private String variantOneOptionValue;
 
-    @CsvBindByPosition(position = 24)
-    @CsvBindByName(column = "Variant 2 Option Name")
-    private String variantTwoOptionName;
 
-    @CsvBindByPosition(position = 25)
-    @CsvBindByName(column = "Variant 2 Option Type")
-    private String variantTwoOptionType;
 
-    @CsvBindByPosition(position = 26)
-    @CsvBindByName(column = "Variant 2 Option Value")
-    private String variantTwoOptionValue;
-
-    @CsvBindByPosition(position = 27)
+    @CsvBindByPosition(position = 23)
     @CsvBindByName(column = "Custom Field 1 Label")
     private String customFieldOneLabel;
 
-    @CsvBindByPosition(position = 28)
+    @CsvBindByPosition(position = 24)
     @CsvBindByName(column = "Custom Field 1 Value")
     private String customFieldOneValue;
 
-    @CsvBindByPosition(position = 29)
+    @CsvBindByPosition(position = 25)
     @CsvBindByName(column = "Custom Field 1 Type")
     private String customFieldOneType;
 
-    @CsvBindByPosition(position = 30)
+    @CsvBindByPosition(position = 26)
     @CsvBindByName(column = "Custom Field 2 Label")
     private String customFieldTwoLabel;
 
-    @CsvBindByPosition(position = 31)
+    @CsvBindByPosition(position = 27)
     @CsvBindByName(column = "Custom Field 2 Value")
     private String customFieldTwoValue;
 
-    @CsvBindByPosition(position = 32)
+    @CsvBindByPosition(position = 28)
     @CsvBindByName(column = "Custom Field 2 Type")
     private String customFieldTwoType;
 
-    @CsvBindByPosition(position = 33)
+    @CsvBindByPosition(position = 29)
     @CsvBindByName(column = "Custom Field 3 Label")
     private String customFieldThreeLabel;
 
-    @CsvBindByPosition(position = 34)
+    @CsvBindByPosition(position = 30)
     @CsvBindByName(column = "Custom Field 3 Value")
     private String customFieldThreeValue;
 
-    @CsvBindByPosition(position = 35)
+    @CsvBindByPosition(position = 31)
     @CsvBindByName(column = "Custom Field 3 Type")
     private String customFieldThreeType;
 
-    @CsvBindByPosition(position = 36)
+    @CsvBindByPosition(position = 32)
     @CsvBindByName(column = "Custom Field 4 Label")
     private String customFieldFourLabel;
 
-    @CsvBindByPosition(position = 37)
+    @CsvBindByPosition(position = 33)
     @CsvBindByName(column = "Custom Field 4 Value")
     private String customFieldFourValue;
 
-    @CsvBindByPosition(position = 38)
+    @CsvBindByPosition(position = 34)
     @CsvBindByName(column = "Custom Field 4 Type")
     private String customFieldFourType;
 
-    @CsvBindByPosition(position = 39)
+    @CsvBindByPosition(position = 35)
     @CsvBindByName(column = "Google Product Category")
     private String googleProductCategory;
 
     public CSVModel() {
     }
 
-    public CSVModel(String permalink, String name, String description, String metaTitle, String metaDescription, String width, String length, String height, String brand, String barcode, String categories, String images, String digital, String featured, String status, String sku, String weight, String stock, String stockUnlimited, String price, String variantImage, String variantOneOptionName, String variantOneOptionType, String variantOneOptionValue, String variantTwoOptionName, String variantTwoOptionType, String variantTwoOptionValue, String customFieldOneLabel, String customFieldOneValue, String customFieldOneType, String customFieldTwoLabel, String customFieldTwoValue, String customFieldTwoType, String customFieldThreeLabel, String customFieldThreeValue, String customFieldThreeType, String customFieldFourLabel, String customFieldFourValue, String customFieldFourType, String googleProductCategory) {
+    public CSVModel(String permalink, String name, String description, String metaTitle, String metaDescription, String width, String length, String height, String brand, String barcode, String categories, String images, String digital, String featured, String status, String sku, String weight, String stock, String stockUnlimited, String price, String variantOneOptionName, String variantOneOptionType, String variantOneOptionValue, String customFieldOneLabel, String customFieldOneValue, String customFieldOneType, String customFieldTwoLabel, String customFieldTwoValue, String customFieldTwoType, String customFieldThreeLabel, String customFieldThreeValue, String customFieldThreeType, String customFieldFourLabel, String customFieldFourValue, String customFieldFourType, String googleProductCategory) {
         this.permalink = permalink;
         this.name = name;
         this.description = description;
@@ -188,13 +175,10 @@ public class CSVModel {
         this.stock = stock;
         this.stockUnlimited = stockUnlimited;
         this.price = price;
-        this.variantImage = variantImage;
         this.variantOneOptionName = variantOneOptionName;
         this.variantOneOptionType = variantOneOptionType;
         this.variantOneOptionValue = variantOneOptionValue;
-        this.variantTwoOptionName = variantTwoOptionName;
-        this.variantTwoOptionType = variantTwoOptionType;
-        this.variantTwoOptionValue = variantTwoOptionValue;
+
         this.customFieldOneLabel = customFieldOneLabel;
         this.customFieldOneValue = customFieldOneValue;
         this.customFieldOneType = customFieldOneType;
@@ -370,14 +354,6 @@ public class CSVModel {
         this.price = price;
     }
 
-    public String getVariantImage() {
-        return variantImage;
-    }
-
-    public void setVariantImage(String variantImage) {
-        this.variantImage = variantImage;
-    }
-
     public String getVariantOneOptionName() {
         return variantOneOptionName;
     }
@@ -400,30 +376,6 @@ public class CSVModel {
 
     public void setVariantOneOptionValue(String variantOneOptionValue) {
         this.variantOneOptionValue = variantOneOptionValue;
-    }
-
-    public String getVariantTwoOptionName() {
-        return variantTwoOptionName;
-    }
-
-    public void setVariantTwoOptionName(String variantTwoOptionName) {
-        this.variantTwoOptionName = variantTwoOptionName;
-    }
-
-    public String getVariantTwoOptionType() {
-        return variantTwoOptionType;
-    }
-
-    public void setVariantTwoOptionType(String variantTwoOptionType) {
-        this.variantTwoOptionType = variantTwoOptionType;
-    }
-
-    public String getVariantTwoOptionValue() {
-        return variantTwoOptionValue;
-    }
-
-    public void setVariantTwoOptionValue(String variantTwoOptionValue) {
-        this.variantTwoOptionValue = variantTwoOptionValue;
     }
 
     public String getCustomFieldOneLabel() {

@@ -28,23 +28,28 @@ public abstract class CSVMapper {
             @Mapping(constant = "0", target = "stock"),
             @Mapping(constant = "NO", target = "stockUnlimited"),
             @Mapping(constant = "0.0", target = "price"),
-            @Mapping(constant = "", target = "variantImage"),
-            @Mapping(constant = "Disponibilidad", target = "variantOneOptionName"),
+
+            @Mapping(constant = "Idioma", target = "variantOneOptionName"),
             @Mapping(constant = "option", target = "variantOneOptionType"),
-            @Mapping(constant = "Español no foil", target = "variantOneOptionValue"),
-            @Mapping(constant = "Rareza", target = "customFieldOneLabel"),
-            @Mapping(source = "card.rarity", target = "customFieldOneValue"),
+            @Mapping(constant = "Ingles", target = "variantOneOptionValue"),
+
+            @Mapping(constant = "Color", target = "customFieldOneLabel"),
+            @Mapping(expression = "java(processColorIdentity(card.getColorIdentity()))", target = "customFieldOneValue"),
             @Mapping(constant = "selection", target = "customFieldOneType"),
+
             @Mapping(constant = "Edicion", target = "customFieldTwoLabel"),
             @Mapping(source = "card.setName", target = "customFieldTwoValue"),
             @Mapping(constant = "selection", target = "customFieldTwoType"),
-            @Mapping(constant = "Color", target = "customFieldThreeLabel"),
-            @Mapping(expression = "java(processColorIdentity(card.getColorIdentity()))", target = "customFieldThreeValue"),
-            @Mapping(constant = "selection", target = "customFieldThreeType"),
-            @Mapping(constant = "Tipo de carta", target = "customFieldFourLabel"),
-            @Mapping(source = "card.typeLine", target = "customFieldFourValue"),
+
+            @Mapping(constant = "Rareza", target = "customFieldFourLabel"),
+            @Mapping(source = "card.rarity", target = "customFieldFourValue"),
             @Mapping(constant = "selection", target = "customFieldFourType"),
-            @Mapping(constant = "", target ="permalink"),
+
+            @Mapping(constant = "Tipo de carta", target = "customFieldThreeLabel"),
+            @Mapping(source = "card.typeLine", target = "customFieldThreeValue"),
+            @Mapping(constant = "selection", target = "customFieldThreeType"),
+
+            //@Mapping(constant = "", target ="permalink"),
             @Mapping(constant = "", target = "brand"),
             @Mapping(constant = "", target = "barcode"),
             @Mapping(constant = "", target = "images"),
@@ -54,7 +59,23 @@ public abstract class CSVMapper {
     public abstract CSVModel toCsvModel(Card card);
 
     public String processColorIdentity(char[] colorIdentity){
+        String identity = new String(colorIdentity);
+        if(identity.length()== 0)
+            return "Incoloro";
+        if(identity.length()>1)
+            return "Multicolor";
+        else
+            switch (identity.toLowerCase()){
+                case "u" : return "Azul";
+                case "w" : return "Blanco";
+                case "r" : return "Rojo";
+                case "b" : return "Negro";
+                case "g" : return "Verde";
+            }
+
         return new String(colorIdentity);
+
+
     }
 
     public String generateCategory(Card card) {
@@ -62,6 +83,7 @@ public abstract class CSVMapper {
     }
 
     public String generateCardName(Card card) {
+
         StringBuffer sb = new StringBuffer();
         return sb.append(card.getName())
                 .append(" #")

@@ -3,7 +3,6 @@ package cl.rivendel.csv.helper;
 import cl.rivendel.csv.mapper.CSVMapper;
 import cl.rivendel.csv.model.jumpseller.CSVModel;
 import cl.rivendel.csv.model.scryfall.Card;
-import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvBindByPosition;
 import com.opencsv.bean.StatefulBeanToCsv;
@@ -32,12 +31,12 @@ public class CSVHelper {
     private CSVMapper csvMapper;
     public void generateJumpSellerCSV(List<CSVModel> csvCards) throws IOException {
         //create file
-        String outputFileName = "C:\\SimpleSolution\\bulkCardUpload.csv";
+        String outputFileName = "C:\\SimpleSolution\\SNC.csv";
 
         try(Writer writer = new FileWriter(outputFileName)) {
             writer.append(buildHeader(CSVModel.class));
             StatefulBeanToCsv<CSVModel> statefulBeanToCsv = new StatefulBeanToCsvBuilder<CSVModel>(writer)
-                    .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
+                    .withSeparator('\t')
                     .build();
             statefulBeanToCsv.write(csvCards);
         } catch (CsvRequiredFieldEmptyException e) {
@@ -53,7 +52,7 @@ public class CSVHelper {
                         && f.getAnnotation( CsvBindByName.class ) != null )
                 .sorted( Comparator.comparing(f -> f.getAnnotation( CsvBindByPosition.class ).position() ) )
                 .map( f -> f.getAnnotation( CsvBindByName.class ).column() )
-                .collect( Collectors.joining( "," ) ) + "\n";
+                .collect( Collectors.joining( "\t" ) ) + "\n";
     }
 
     public List<CSVModel> cardListToCsvModelList(List<Card> cardList) {
