@@ -17,10 +17,7 @@ import org.springframework.stereotype.Component;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -60,7 +57,10 @@ public class CSVHelper {
         for (Card card: cardList) {
             returnedList.add(csvMapper.toCsvModel(card));
         }
-
         return returnedList;
+    }
+
+    public void updateImagesUris(List<Card> cardsList, Map<String, String> newValues) {
+        //TODO update imageURLs
     }
 }

@@ -47,30 +47,41 @@ public abstract class CSVMapper {
 
             @Mapping(constant = "Tipo de carta", target = "customFieldThreeLabel"),
             @Mapping(source = "card.typeLine", target = "customFieldThreeValue"),
-            @Mapping(constant = "selection", target = "customFieldThreeType")
+            @Mapping(constant = "selection", target = "customFieldThreeType"),
 
             //@Mapping(constant = "", target ="permalink"),
             //@Mapping(constant = "", target = "brand"),
             //@Mapping(constant = "", target = "barcode"),
-            //@Mapping(constant = "", target = "images"),
+            @Mapping(expression = "java(setCardImage(card))", target = "images"),
             //@Mapping(constant = "", target = "sku"),
             //@Mapping(constant = "", target = "googleProductCategory")
     })
     public abstract CSVModel toCsvModel(Card card);
 
-    public String processColorIdentity(char[] colorIdentity){
+    public String setCardImage(Card card) {
+        if (card.getImageUris() != null && card.getImageUris().get("png") != null)
+            return card.getImageUris().get("png");
+        return "";
+    }
+
+    public String processColorIdentity(char[] colorIdentity) {
         String identity = new String(colorIdentity);
-        if(identity.length()== 0)
+        if (identity.length() == 0)
             return "Incoloro";
-        if(identity.length()>1)
+        if (identity.length() > 1)
             return "Multicolor";
         else
-            switch (identity.toLowerCase()){
-                case "u" : return "Azul";
-                case "w" : return "Blanco";
-                case "r" : return "Rojo";
-                case "b" : return "Negro";
-                case "g" : return "Verde";
+            switch (identity.toLowerCase()) {
+                case "u":
+                    return "Azul";
+                case "w":
+                    return "Blanco";
+                case "r":
+                    return "Rojo";
+                case "b":
+                    return "Negro";
+                case "g":
+                    return "Verde";
             }
 
         return new String(colorIdentity);
@@ -98,7 +109,7 @@ public abstract class CSVMapper {
                 .append(card.getTypeLine())
                 .append(P_CLOSING)
                 .append(P_OPENING)
-                .append(card.getOracleText().replace("\n", "").replace("\r", ""))
+                .append(card.getOracleText().replace("\n", "</br>").replace("\r", ""))
                 .append(P_CLOSING);
         if (card.getTypeLine().toUpperCase().contains(CREATURE.toUpperCase())) {
             sb.append(P_OPENING)
@@ -108,7 +119,7 @@ public abstract class CSVMapper {
                     .append(P_CLOSING);
         }
 
-        if (card.getTypeLine().toUpperCase().contains("PLANESWALKER")){
+        if (card.getTypeLine().toUpperCase().contains("PLANESWALKER")) {
             sb.append(P_OPENING)
                     .append("Loyalty: ")
                     .append(card.getLoyalty())
@@ -120,6 +131,9 @@ public abstract class CSVMapper {
                 .append("<a href='https://scryfall.com/search?q=a%3A%E2%80%9C")
                 .append(card.getArtist().replace(" ", "+"))
                 .append("%E2%80%9D&unique=art")
+                .append(">")
+                .append(card.getArtist())
+                .append("</a>")
                 .toString();
 
     }

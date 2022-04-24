@@ -20,6 +20,7 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,8 +56,8 @@ public class ScryfallHelper {
         }
     }
 
-    public List<String> getOracleCardsImages(List<Card> cardList) {
-        List<String> downloadedCardsNames = new ArrayList<>();
+    public Map<String, String> getOracleCardsImages(List<Card> cardList) {
+        Map<String, String> downloadedCardsNames = new HashMap<>();
         new File(ORACLE_CARDS_FOLDER).mkdir();
         boolean skipHighRes = true;
         for (Card card : cardList) {
@@ -68,7 +69,7 @@ public class ScryfallHelper {
                         FileOutputStream fileOutputStream = new FileOutputStream(fileName);
                         fileOutputStream.getChannel()
                                 .transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-                        downloadedCardsNames.add(fileName);
+                        downloadedCardsNames.put(card.getCollectorNumber() ,fileName);
                     } catch (IOException ioException) {
                         log.error("IoException while downloading card image", ioException);
                     }
