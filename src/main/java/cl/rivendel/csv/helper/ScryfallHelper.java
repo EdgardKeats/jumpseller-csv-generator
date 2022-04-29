@@ -19,10 +19,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -36,6 +33,8 @@ public class ScryfallHelper {
     @Autowired
     private ScryfallClient scryfallClient;
 
+    private boolean testRun = false;
+
     public String getOracleCardsURL() {
         return scryfallClient.getBulkData()
                 .getData()
@@ -45,6 +44,8 @@ public class ScryfallHelper {
     }
 
     public List<Card> getSetCards(String jsonUrl, String set) throws IOException {
+        if(testRun)
+            return Collections.singletonList(getOracleCards(jsonUrl).stream().filter(p -> p.getSet().trim().equalsIgnoreCase(set)).findFirst().get());
         return getOracleCards(jsonUrl).stream().filter(p -> p.getSet().trim().equalsIgnoreCase(set)).collect(Collectors.toList());
     }
 

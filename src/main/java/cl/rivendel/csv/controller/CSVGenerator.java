@@ -51,9 +51,6 @@ public class CSVGenerator {
         log.info("getting cards from set: {}", setMap.get(firstFoundSet));
         List<Card> cardsList = scryfallHelper.getSetCards(baseJsonUrl, firstFoundSet);
 
-        log.info("creating csv models");
-        List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
-
         if(createImages) {
             log.info("getting {} cards images", cardsList.size());
             cardNames = scryfallHelper.getOracleCardsImages(cardsList);
@@ -67,6 +64,9 @@ public class CSVGenerator {
             log.info("updating csv file with card images urls");
             csvHelper.updateImagesUris(cardsList, cardNames);
         }
+
+        log.info("creating csv models");
+        List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
 
         log.info("creating jumpseller csv file");
         csvHelper.generateJumpSellerCSV(listCSVModel);

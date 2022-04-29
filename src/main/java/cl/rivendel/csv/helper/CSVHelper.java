@@ -61,6 +61,9 @@ public class CSVHelper {
     }
 
     public void updateImagesUris(List<Card> cardsList, Map<String, String> newValues) {
-        //TODO update imageURLs
+        for (Card card: cardsList) {
+            log.info("Setting card image url: {}", newValues.get(card.getCollectorNumber()));
+            card.getImageUris().put("imgBB", newValues.get(card.getCollectorNumber()));
+        }
     }
 }

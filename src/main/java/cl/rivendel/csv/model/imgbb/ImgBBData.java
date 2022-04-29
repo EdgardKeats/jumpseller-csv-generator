@@ -7,6 +7,9 @@ public class ImgBBData {
     private String title;
     @JsonProperty("url_viewer")
     private String urlViewer;
+    private String url;
+    @JsonProperty("display_url")
+    private String displayURL;
     private String width;
     private String height;
     private String size;
@@ -21,10 +24,12 @@ public class ImgBBData {
     public ImgBBData() {
     }
 
-    public ImgBBData(String id, String title, String urlViewer, String width, String height, String size, String time, String expiration, ImgBBImage image, ImgBBImage thumb, ImgBBImage medium, String deleteUrl) {
+    public ImgBBData(String id, String title, String urlViewer, String url, String displayURL, String width, String height, String size, String time, String expiration, ImgBBImage image, ImgBBImage thumb, ImgBBImage medium, String deleteUrl) {
         this.id = id;
         this.title = title;
         this.urlViewer = urlViewer;
+        this.url = url;
+        this.displayURL = displayURL;
         this.width = width;
         this.height = height;
         this.size = size;
@@ -58,6 +63,22 @@ public class ImgBBData {
 
     public void setUrlViewer(String urlViewer) {
         this.urlViewer = urlViewer;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getDisplayURL() {
+        return displayURL;
+    }
+
+    public void setDisplayURL(String displayURL) {
+        this.displayURL = displayURL;
     }
 
     public String getWidth() {
