@@ -43,10 +43,23 @@ public class ScryfallHelper {
                 .findFirst().map(BulkData::getDownloadUri).get();
     }
 
-    public List<Card> getSetCards(String jsonUrl, String set) throws IOException {
-        if(testRun)
-            return Collections.singletonList(getOracleCards(jsonUrl).stream().filter(p -> p.getSet().trim().equalsIgnoreCase(set)).findFirst().get());
-        return getOracleCards(jsonUrl).stream().filter(p -> p.getSet().trim().equalsIgnoreCase(set)).collect(Collectors.toList());
+    public List<Card> getSetCards(String jsonUrl, String set){
+
+        try {
+            return getOracleCards(jsonUrl).stream().filter(p -> p.getSet().trim().equalsIgnoreCase(set)).collect(Collectors.toList());
+        } catch (IOException ex){
+            log.error(ex.getMessage());
+            return new ArrayList<>();
+        }
+    }
+    public List<Card> testGetSetCards(String jsonUrl, String set){
+        try {
+             return Collections.singletonList(getOracleCards(jsonUrl).stream().filter(p -> p.getSet().trim().equalsIgnoreCase(set)).findFirst().get());
+
+        } catch (IOException ex){
+            log.error(ex.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public List<Card> getOracleCards(String jsonUrl) throws IOException {

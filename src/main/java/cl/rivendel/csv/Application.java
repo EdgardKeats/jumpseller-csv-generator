@@ -1,22 +1,43 @@
 package cl.rivendel.csv;
 
-import cl.rivendel.csv.controller.CSVGenerator;
+import cl.rivendel.csv.helper.CSVHelper;
+import cl.rivendel.csv.helper.CardImageHelper;
+import cl.rivendel.csv.helper.FtpHelper;
+import cl.rivendel.csv.helper.ScryfallHelper;
+import cl.rivendel.csv.model.jumpseller.CSVModel;
+import cl.rivendel.csv.model.scryfall.Card;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
+import java.util.List;
+import java.util.Map;
+
 @SpringBootApplication
 @EnableFeignClients
 public class Application implements CommandLineRunner {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     @Autowired
-    private CSVGenerator csvGenerator;
+    private CardImageHelper cardImageHelper;
+    @Autowired
+    private ScryfallHelper scryfallHelper;
+    @Autowired
+    private CSVHelper csvHelper;
+    @Autowired
+    private FtpHelper ftpHelper;
+
+    @Value("${csvGenProperty.testRun:false}")
+    private boolean testRun;
+
+    @Value("${csvGenProperty.createImage:false}")
+    private boolean createImages;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -24,8 +45,45 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        LOGGER.info("Iniciando...");
-        csvGenerator.generateCSV();
-        LOGGER.info("Finalizando...");
+        if (testRun) {
+            testGenerateCSV();
+        } else {
+            //TODO: Instanciar JavaFX
+        }
+    }
+
+    public void testGenerateCSV() {
+        Map<String, String> cardNames;
+        log.info("getting sets");
+        Map<String, String> setMap = scryfallHelper.getSets();
+
+        log.info("getting base json");
+        String baseJsonUrl = scryfallHelper.getOracleCardsURL();
+        String firstFoundSet = "snc";
+
+        log.info("getting cards from set: {}", setMap.get(firstFoundSet));
+        List<Card> cardsList = scryfallHelper.testGetSetCards(baseJsonUrl, firstFoundSet);
+
+        if (!cardsList.isEmpty()) {
+            if (createImages) {
+                log.info("getting {} cards images", cardsList.size());
+                cardNames = scryfallHelper.getOracleCardsImages(cardsList);
+
+                log.info("processing card images");
+                cardImageHelper.createJumpsellerImages(cardNames);
+
+                log.info("uploading jumpseller images to image server");
+                ftpHelper.uploadImages(cardNames);
+
+                log.info("updating csv file with card images urls");
+                csvHelper.updateImagesUris(cardsList, cardNames);
+            }
+
+            log.info("creating csv models");
+            List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
+
+            log.info("creating jumpseller csv file");
+            csvHelper.generateJumpSellerCSV(listCSVModel, "C:\\SimpleSolution\\SNC.csv");
+        }
     }
 }

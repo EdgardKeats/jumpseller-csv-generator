@@ -26,20 +26,16 @@ public class CSVHelper {
 
     @Autowired
     private CSVMapper csvMapper;
-    public void generateJumpSellerCSV(List<CSVModel> csvCards) throws IOException {
-        //create file
-        String outputFileName = "C:\\SimpleSolution\\SNC.csv";
 
+    public void generateJumpSellerCSV(List<CSVModel> csvCards, String outputFileName) {
         try(Writer writer = new FileWriter(outputFileName)) {
             writer.append(buildHeader(CSVModel.class));
             StatefulBeanToCsv<CSVModel> statefulBeanToCsv = new StatefulBeanToCsvBuilder<CSVModel>(writer)
                     .withSeparator('\t')
                     .build();
             statefulBeanToCsv.write(csvCards);
-        } catch (CsvRequiredFieldEmptyException e) {
-            e.printStackTrace();
-        } catch (CsvDataTypeMismatchException e) {
-            e.printStackTrace();
+        } catch (CsvRequiredFieldEmptyException | CsvDataTypeMismatchException | IOException e) {
+            log.error(e.getMessage());
         }
     }
 
