@@ -66,24 +66,7 @@ public class Application implements CommandLineRunner {
                 tempMap.put(contador, entry.getKey());
                 contador++;
             }
-            boolean continueLoop = true;
-            while (continueLoop){
-                System.out.print("Pick a valid number: ");
-                String value = scanner.nextLine();
-                if(StringUtils.isNotEmpty(value)){
-                    try {
-                        int validNumber = Integer.parseInt(value);
-                        if((validNumber > mapOfSetLists.size()) || (validNumber<=0)){
-                            System.out.println("\""+value+"\" was not a valid number, try again...");
-                        } else {
-                            setType = tempMap.get(validNumber);
-                            continueLoop = false;
-                        }
-                    } catch (NumberFormatException numberFormatException){
-                        System.out.println("\""+value+"\" was not a valid number, try again...");
-                    }
-                }
-            }
+            setType = tempMap.get(menuSelector(scanner, tempMap));
 
             List<Card> cardsList = showGetCardListMenu(scanner, mapOfSetLists.get(setType));
 
@@ -108,37 +91,39 @@ public class Application implements CommandLineRunner {
         }
     }
 
-    private List<Card> showGetCardListMenu(Scanner scanner, List<Set> setList){
-        int contador = 1;
-        boolean notContinue = true;
-        boolean skip = false;
-        String set = "";
-        String baseJsonUrl = scryfallHelper.getOracleCardsURL();
-        for (Set entry :setList) {
-            contador++;
-            System.out.println("Key : " + entry.getCode() + ", Value : " + entry.getName());
-
-            if(contador == 10) {
-                System.out.println("Ingrese set o ingrese 1 para continuar");
-                set = scanner.nextLine();
-                while(notContinue) {
-                    if (set.equalsIgnoreCase("1")) {
-                        System.out.println("continuando...");
-                        set = "";
-                        contador = 1;
-                        notContinue = false;
-                    } else if (set.length() == 3) {
-                        skip = true;
-                        notContinue = false;
+    private int menuSelector(Scanner scanner, Map<Integer, String> menuValues){
+        boolean continueLoop = true;
+        while (continueLoop){
+            System.out.print("Pick a valid number: ");
+            String value = scanner.nextLine();
+            if(StringUtils.isNotEmpty(value)){
+                try {
+                    int validNumber = Integer.parseInt(value);
+                    if((validNumber > menuValues.size()) || (validNumber<=0)){
+                        System.out.println("\""+value+"\" was not a valid number, try again...");
                     } else {
-                        System.out.println("Por favor, ingrese un valor válido");
-                        notContinue = false;
+                        return validNumber;
                     }
+                } catch (NumberFormatException numberFormatException){
+                    System.out.println("\""+value+"\" was not a valid number, try again...");
                 }
-                if (skip)
-                    break;
             }
         }
+        return 0;
+    }
+
+    private List<Card> showGetCardListMenu(Scanner scanner, List<Set> setList){
+        int contador = 1;
+        String set = "";
+        Map<Integer, String> tempMap = new HashMap<>();
+        String baseJsonUrl = scryfallHelper.getOracleCardsURL();
+        for (Set entry :setList) {
+            System.out.println(contador+") Key : " + entry.getCode() + ", Value : " + entry.getName());
+            tempMap.put(contador, entry.getCode());
+            contador++;
+        }
+
+        set = tempMap.get(menuSelector(scanner, tempMap));
 
         return scryfallHelper.getSetCards(baseJsonUrl, set);
     }
