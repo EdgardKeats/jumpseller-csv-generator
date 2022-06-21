@@ -3,7 +3,6 @@ package cl.rivendel.csv.helper;
 import cl.rivendel.csv.model.scryfall.BulkData;
 import cl.rivendel.csv.model.scryfall.Card;
 import cl.rivendel.csv.model.scryfall.Set;
-import cl.rivendel.csv.model.scryfall.SetListObject;
 import cl.rivendel.csv.service.client.ScryfallClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +19,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
