@@ -131,11 +131,13 @@ public class Card {
     private char[] colorIndicator;
     @JsonProperty("content_warning")
     private String contentWarning;
+    @JsonProperty("penny_rank")
+    private String pennyRank;
 
     public Card() {
     }
 
-    public Card(String object, UUID id, String oracleId, int[] multiverseIds, int mtgoId, int mtgoFoilId, int tcgPlayerId, int tcgplayerEtchedId, int cardmarketId, String name, String lang, String releasedAt, String uri, String scryfallUri, String layout, boolean highresImage, String imageStatus, Map<String, String> imageUris, String manaCost, float cmc, String typeLine, String oracleText, String power, String toughness, char[] colors, char[] colorIdentity, String[] keywords, Map<String, String> legalities, String[] games, boolean reserved, boolean foil, boolean nonfoil, String[] finishes, boolean oversized, boolean promo, boolean reprint, boolean variation, UUID setId, String set, String setName, String setType, String setUri, String setSearchUri, String scryfallSetUri, String rulingsUri, String printsSearchUri, String collectorNumber, boolean digital, String rarity, String cardBackId, String artist, String[] artistIds, String illustrationId, String borderColor, String frame, List<String> frameEffects, String securityStamp, boolean fullArt, boolean textless, boolean booster, boolean storySpotlight, int edhrecRank, Map<String, String> preview, Map<String, String> prices, Map<String, String> relatedUris, String flavorName, String flavorText, int arenaId, String watermark, char[] producedMana, List<RelatedCards> allParts, List<CardFace> cardFaces, List<String> promoTypes, String loyalty, String lifeModifier, String handModifier, char[] colorIndicator, String contentWarning) {
+    public Card(String object, UUID id, String oracleId, int[] multiverseIds, int mtgoId, int mtgoFoilId, int tcgPlayerId, int tcgplayerEtchedId, int cardmarketId, String name, String lang, String releasedAt, String uri, String scryfallUri, String layout, boolean highresImage, String imageStatus, Map<String, String> imageUris, String manaCost, float cmc, String typeLine, String oracleText, String power, String toughness, char[] colors, char[] colorIdentity, String[] keywords, Map<String, String> legalities, String[] games, boolean reserved, boolean foil, boolean nonfoil, String[] finishes, boolean oversized, boolean promo, boolean reprint, boolean variation, UUID setId, String set, String setName, String setType, String setUri, String setSearchUri, String scryfallSetUri, String rulingsUri, String printsSearchUri, String collectorNumber, boolean digital, String rarity, String cardBackId, String artist, String[] artistIds, String illustrationId, String borderColor, String frame, List<String> frameEffects, String securityStamp, boolean fullArt, boolean textless, boolean booster, boolean storySpotlight, int edhrecRank, Map<String, String> preview, Map<String, String> prices, Map<String, String> relatedUris, String flavorName, String flavorText, int arenaId, String watermark, char[] producedMana, List<RelatedCards> allParts, List<CardFace> cardFaces, List<String> promoTypes, String loyalty, String lifeModifier, String handModifier, char[] colorIndicator, String contentWarning, String pennyRank) {
         this.object = object;
         this.id = id;
         this.oracleId = oracleId;
@@ -214,6 +216,7 @@ public class Card {
         this.handModifier = handModifier;
         this.colorIndicator = colorIndicator;
         this.contentWarning = contentWarning;
+        this.pennyRank = pennyRank;
     }
 
     public String getObject() {
@@ -838,5 +841,13 @@ public class Card {
 
     public void setContentWarning(String contentWarning) {
         this.contentWarning = contentWarning;
+    }
+
+    public String getPennyRank(){
+        return this.pennyRank;
+    }
+
+    public void setPennyRank(String pennyRank){
+        this.pennyRank = pennyRank;
     }
 }

@@ -1,32 +1,32 @@
 package cl.rivendel.csv.helper;
 
-import cl.rivendel.csv.model.scryfall.Card;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
 import javax.imageio.ImageIO;
-import java.awt.*;
+
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 
 @Component
 public class CardImageHelper {
     private static final Logger log = LoggerFactory.getLogger(CardImageHelper.class);
 
     public void createJumpsellerImages(Map<String, String> oracleCardsPaths){
-        for (Map.Entry<String, String> cardName: oracleCardsPaths.entrySet()) {
+        oracleCardsPaths.values().forEach(cardName -> {
             try {
-                redrawImage(cardName.getValue());
-            }catch (IOException exception){
-                log.error("Error while trying to redraw image {}: {}", cardName, exception);
+                CardImageHelper.this.redrawImage(cardName);
+            } catch (IOException e) {
+                log.error("Error while trying to redraw image {}: {}", cardName, e);
             }
-        }
-
+        });
     }
 
 

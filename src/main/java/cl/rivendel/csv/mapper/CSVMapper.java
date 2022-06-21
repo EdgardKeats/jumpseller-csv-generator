@@ -108,7 +108,7 @@ public abstract class CSVMapper {
                 .append("\n")
 
                 .append(P_OPENING)
-                .append(card.getOracleText().replace("\n", "</br>").replace("\r", ""))
+                .append(card.getOracleText() != null ? card.getOracleText().replace("\n", "</br>").replace("\r", "") : "")
                 .append(P_CLOSING)
                 .append("\n");
         if (card.getTypeLine().toUpperCase().contains(CREATURE.toUpperCase())) {

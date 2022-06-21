@@ -17,6 +17,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 @SpringBootApplication
 @EnableFeignClients
@@ -48,6 +49,60 @@ public class Application implements CommandLineRunner {
         if (testRun) {
             testGenerateCSV();
         } else {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Cargando listado de cartas");
+            Map<String, String> setMap = scryfallHelper.getSets();
+            String baseJsonUrl = scryfallHelper.getOracleCardsURL();
+            int contador = 1;
+            boolean notContinue = true;
+            boolean skip = false;
+            String set = "";
+            for (Map.Entry<String, String> entry : setMap.entrySet()) {
+                contador++;
+                System.out.println("Key : " + entry.getKey() + ", Value : " + entry.getValue());
+
+                if(contador == 10) {
+                    System.out.println("Ingrese set o ingrese 1 para continuar");
+                    set = scanner.nextLine();
+                    while(notContinue) {
+                        if (set.equalsIgnoreCase("1")) {
+                            System.out.println("continuando...");
+                            set = "";
+                            contador = 1;
+                            notContinue = false;
+                        } else if (set.length() == 3) {
+                            skip = true;
+                            notContinue = false;
+                        } else {
+                            System.out.println("Por favor, ingrese un valor válido");
+                            notContinue = false;
+                        }
+                    }
+                    if (skip)
+                        break;
+                }
+            }
+
+            List<Card> cardsList = scryfallHelper.getSetCards(baseJsonUrl, set);
+
+            if (!cardsList.isEmpty()) {
+                Map<String, String> cardNames;
+                log.info("getting " + cardsList.size() + " cards images");
+                cardNames = scryfallHelper.getOracleCardsImages(cardsList);
+                log.info("processing card images");
+                cardImageHelper.createJumpsellerImages(cardNames);
+                log.info("uploading jumpseller images to image server");
+                ftpHelper.uploadImages(cardNames);
+                log.info("updating csv file with card images urls");
+                csvHelper.updateImagesUris(cardsList, cardNames);
+                log.info("creating csv models");
+                List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
+                log.info("creating jumpseller csv file");
+                csvHelper.generateJumpSellerCSV(listCSVModel, "C:\\SimpleSolution\\SNC.csv");
+            }
+            System.out.println("Fin de generacion! :D");
+
+
             //TODO: Instanciar JavaFX
         }
     }

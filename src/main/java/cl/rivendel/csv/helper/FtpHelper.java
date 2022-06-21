@@ -34,6 +34,7 @@ public class FtpHelper {
     private String imgBBApiKey;
 
     public void uploadImages(Map<String, String> setImages) {
+        log.trace("apikey: {}", imgBBApiKey);
         for (Map.Entry<String, String> entry: setImages.entrySet()) {
             try {
                 String base64Image = getBase64Image(entry.getValue());
@@ -54,6 +55,7 @@ public class FtpHelper {
     }
 
     private String uploadImage(String base64Image, String imgName) throws IOException {
+        log.trace("uploading base64Image={}, imgName={}", base64Image, imgName);
         String returnValue = "";
         CloseableHttpClient httpclient = null;
         try {
@@ -78,7 +80,10 @@ public class FtpHelper {
                 returnValue = responsePojo.getData().getImage().getUrl();
                 log.trace("new value! {}", returnValue);
 
+            } else {
+                log.error("Non 200 response from ftp service: {} {}", response2.getCode(), response2.getReasonPhrase());
             }
+
         } catch (IOException | ParseException e) {
             log.error(e.getMessage());
         } finally {
