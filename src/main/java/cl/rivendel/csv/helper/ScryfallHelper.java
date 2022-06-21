@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class ScryfallHelper {
 
     private static final Logger log = LoggerFactory.getLogger(ScryfallHelper.class);
-    private static final String ORACLE_CARDS_FOLDER = "C:\\SimpleSolution\\oracleCards\\";
+    private static final String ORACLE_CARDS_FOLDER = ".\\oracleCards\\";
     private static final String ORACLE_CARDS = "oracle_cards";
     private static final String HIGH_RES_SCAN = "highres_scan";
     private static final String PNG = "png";
@@ -99,9 +99,11 @@ public class ScryfallHelper {
         return downloadedCardsNames;
     }
 
-
-
     public Map<String, String> getSets() {
         return scryfallClient.getAllSets().getData().stream().collect(Collectors.toMap(Set::getCode, Set::getName));
+    }
+
+    public Map<String, List<Set>> getSetsDividedByType() {
+        return scryfallClient.getAllSets().getData().stream().collect(Collectors.groupingBy(Set::getSetType));
     }
 }

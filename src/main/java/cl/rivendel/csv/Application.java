@@ -6,6 +6,8 @@ import cl.rivendel.csv.helper.FtpHelper;
 import cl.rivendel.csv.helper.ScryfallHelper;
 import cl.rivendel.csv.model.jumpseller.CSVModel;
 import cl.rivendel.csv.model.scryfall.Card;
+import cl.rivendel.csv.model.scryfall.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +17,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @SpringBootApplication
 @EnableFeignClients
@@ -45,69 +46,101 @@ public class Application implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         if (testRun) {
             testGenerateCSV();
         } else {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Cargando listado de cartas");
-            Map<String, String> setMap = scryfallHelper.getSets();
-            String baseJsonUrl = scryfallHelper.getOracleCardsURL();
-            int contador = 1;
-            boolean notContinue = true;
-            boolean skip = false;
-            String set = "";
-            for (Map.Entry<String, String> entry : setMap.entrySet()) {
-                contador++;
-                System.out.println("Key : " + entry.getKey() + ", Value : " + entry.getValue());
+            Map<String, List<Set>> mapOfSetLists = scryfallHelper.getSetsDividedByType();
 
-                if(contador == 10) {
-                    System.out.println("Ingrese set o ingrese 1 para continuar");
-                    set = scanner.nextLine();
-                    while(notContinue) {
-                        if (set.equalsIgnoreCase("1")) {
-                            System.out.println("continuando...");
-                            set = "";
-                            contador = 1;
-                            notContinue = false;
-                        } else if (set.length() == 3) {
-                            skip = true;
-                            notContinue = false;
+            int contador = 1;
+            String setType = "";
+            Map<Integer, String> tempMap = new HashMap<>();
+            for (Map.Entry<String, List<Set>> entry : mapOfSetLists.entrySet()){
+                System.out.print(contador+") ");
+                System.out.println(entry.getKey());
+                tempMap.put(contador, entry.getKey());
+                contador++;
+            }
+            boolean continueLoop = true;
+            while (continueLoop){
+                System.out.print("Pick a valid number: ");
+                String value = scanner.nextLine();
+                if(StringUtils.isNotEmpty(value)){
+                    try {
+                        int validNumber = Integer.parseInt(value);
+                        if((validNumber > mapOfSetLists.size()) || (validNumber<=0)){
+                            System.out.println("\""+value+"\" was not a valid number, try again...");
                         } else {
-                            System.out.println("Por favor, ingrese un valor válido");
-                            notContinue = false;
+                            setType = tempMap.get(validNumber);
+                            continueLoop = false;
                         }
+                    } catch (NumberFormatException numberFormatException){
+                        System.out.println("\""+value+"\" was not a valid number, try again...");
                     }
-                    if (skip)
-                        break;
                 }
             }
 
-            List<Card> cardsList = scryfallHelper.getSetCards(baseJsonUrl, set);
+            List<Card> cardsList = showGetCardListMenu(scanner, mapOfSetLists.get(setType));
 
             if (!cardsList.isEmpty()) {
                 Map<String, String> cardNames;
-                log.info("getting " + cardsList.size() + " cards images");
+                System.out.println("getting " + cardsList.size() + " cards images");
                 cardNames = scryfallHelper.getOracleCardsImages(cardsList);
-                log.info("processing card images");
+                System.out.println("processing card images");
                 cardImageHelper.createJumpsellerImages(cardNames);
-                log.info("uploading jumpseller images to image server");
+                System.out.println("uploading jumpseller images to image server");
                 ftpHelper.uploadImages(cardNames);
-                log.info("updating csv file with card images urls");
+                System.out.println("updating csv file with card images urls");
                 csvHelper.updateImagesUris(cardsList, cardNames);
-                log.info("creating csv models");
+                System.out.println("creating csv models");
                 List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
-                log.info("creating jumpseller csv file");
-                csvHelper.generateJumpSellerCSV(listCSVModel, "C:\\SimpleSolution\\SNC.csv");
+                System.out.println("creating jumpseller csv file");
+                String nowName = LocalDateTime.now().toString();
+                csvHelper.generateJumpSellerCSV(listCSVModel, ".\\"+nowName+".csv");
             }
             System.out.println("Fin de generacion! :D");
 
-
-            //TODO: Instanciar JavaFX
         }
     }
 
-    public void testGenerateCSV() {
+    private List<Card> showGetCardListMenu(Scanner scanner, List<Set> setList){
+        int contador = 1;
+        boolean notContinue = true;
+        boolean skip = false;
+        String set = "";
+        String baseJsonUrl = scryfallHelper.getOracleCardsURL();
+        for (Set entry :setList) {
+            contador++;
+            System.out.println("Key : " + entry.getCode() + ", Value : " + entry.getName());
+
+            if(contador == 10) {
+                System.out.println("Ingrese set o ingrese 1 para continuar");
+                set = scanner.nextLine();
+                while(notContinue) {
+                    if (set.equalsIgnoreCase("1")) {
+                        System.out.println("continuando...");
+                        set = "";
+                        contador = 1;
+                        notContinue = false;
+                    } else if (set.length() == 3) {
+                        skip = true;
+                        notContinue = false;
+                    } else {
+                        System.out.println("Por favor, ingrese un valor válido");
+                        notContinue = false;
+                    }
+                }
+                if (skip)
+                    break;
+            }
+        }
+
+        return scryfallHelper.getSetCards(baseJsonUrl, set);
+    }
+
+    private void testGenerateCSV() {
         Map<String, String> cardNames;
         log.info("getting sets");
         Map<String, String> setMap = scryfallHelper.getSets();
