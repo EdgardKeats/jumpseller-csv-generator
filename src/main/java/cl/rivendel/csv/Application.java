@@ -7,6 +7,7 @@ import cl.rivendel.csv.helper.ScryfallHelper;
 import cl.rivendel.csv.model.jumpseller.CSVModel;
 import cl.rivendel.csv.model.scryfall.Card;
 import cl.rivendel.csv.model.scryfall.Set;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +84,7 @@ public class Application implements CommandLineRunner {
                 System.out.println("creating csv models");
                 List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
                 System.out.println("creating jumpseller csv file");
-                String nowName = LocalDateTime.now().toString();
+                String nowName = "AWO-list";
                 csvHelper.generateJumpSellerCSV(listCSVModel, ".\\"+nowName+".csv");
             }
             System.out.println("Fin de generacion! :D");
