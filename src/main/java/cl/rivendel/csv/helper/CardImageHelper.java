@@ -26,11 +26,7 @@ public class CardImageHelper {
             }
         });
     }
-
-    public boolean retornaBoolean(String palo){
-        return palo.trim().equalsIgnoreCase("palo");
-    }
-
+    
     public void redrawImage(String cardPath) throws IOException {
         File file = new File(cardPath);
         BufferedImage bi = ImageIO.read(file);

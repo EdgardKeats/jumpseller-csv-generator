@@ -4,8 +4,11 @@ import cl.rivendel.csv.model.scryfall.BulkData;
 import cl.rivendel.csv.model.scryfall.Card;
 import cl.rivendel.csv.model.scryfall.Set;
 import cl.rivendel.csv.service.client.ScryfallClient;
+import cl.rivendel.csv.utils.Constants;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,27 +34,16 @@ import java.util.stream.Collectors;
 public class ScryfallHelper {
 
     private static final Logger log = LoggerFactory.getLogger(ScryfallHelper.class);
-    private static final String ORACLE_CARDS_FOLDER = ".\\oracleCards\\";
-    private static final String ORACLE_CARDS = "oracle_cards";
-    private static final String HIGH_RES_SCAN = "highres_scan";
-    private static final String PNG = "png";
-    private static final String PNG_EXTENSION = ".png";
-    private static final String HYPHEN = "-";
-    private static final String FORWARD_SLASH = "/";
-
-    @Autowired
     private ScryfallClient scryfallClient;
-
-    @Value("${csvGenProperty.skipHighResImage:true}")
     private boolean skipHighRes;
 
+    public ScryfallHelper(@Autowired ScryfallClient scryfallClient, @Value("${csvGenProperty.skipHighResImage:true}") boolean skipHighRes){
+        this.scryfallClient = scryfallClient;
+        this.skipHighRes = skipHighRes;
+    }
 
     public String getOracleCardsURL() {
-        return scryfallClient.getBulkData()
-                .getData()
-                .stream()
-                .filter(bulkData1 -> bulkData1.getType().equalsIgnoreCase(ORACLE_CARDS))
-                .findFirst().map(BulkData::getDownloadUri).get();
+        return scryfallClient.getBulkData().getData().stream().filter(bulkData1 -> bulkData1.getType().equalsIgnoreCase(Constants.ORACLE_CARDS)).findFirst().map(BulkData::getDownloadUri).get();
     }
 
     public List<Card> getSetCards(String jsonUrl, String set) {
@@ -82,22 +74,24 @@ public class ScryfallHelper {
         }
     }
 
-    public Map<String, String> getOracleCardsImages(List<Card> cardList) {
+    public Map<String, String> getOracleCardsImages(List<Card> cardList) throws Exception {
         Map<String, String> downloadedCardsNames = new HashMap<>();
-        new File(ORACLE_CARDS_FOLDER).mkdir();
-        for (Card card : cardList) {
-            if (card.getImageUris() != null && (skipHighRes || card.getImageStatus().equalsIgnoreCase(HIGH_RES_SCAN))) {
-                try {
-                    ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(card.getImageUris().get(PNG)).openStream());
-                    String fileName = ORACLE_CARDS_FOLDER + card.getName().replace(FORWARD_SLASH, HYPHEN) + HYPHEN + card.getSet() + PNG_EXTENSION;
-                    FileOutputStream fileOutputStream = new FileOutputStream(fileName);
-                    fileOutputStream.getChannel()
-                            .transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-                    downloadedCardsNames.put(card.getCollectorNumber(), fileName);
-                } catch (IOException ioException) {
-                    log.error("IoException while downloading card image", ioException);
+        if (new File(Constants.ORACLE_CARDS_FOLDER).mkdir()) {
+            for (Card card : cardList) {
+                if (card.getImageUris() != null && (skipHighRes || card.getImageStatus().equalsIgnoreCase(Constants.HIGH_RES_SCAN))) {
+                    try {
+                        ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(card.getImageUris().get(Constants.PNG)).openStream());
+                        String fileName = Constants.ORACLE_CARDS_FOLDER + card.getName().replace(Constants.FORWARD_SLASH, Constants.HYPHEN) + Constants.HYPHEN + card.getSet() + Constants.PNG_EXTENSION;
+                        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+                        fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+                        downloadedCardsNames.put(card.getCollectorNumber(), fileName);
+                    } catch (IOException ioException) {
+                        log.error("IoException while downloading card image", ioException);
+                    }
                 }
             }
+        } else {
+            throw new Exception("The target folder was not created");
         }
         return downloadedCardsNames;
     }

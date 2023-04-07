@@ -1,6 +1,5 @@
 package cl.rivendel.csv.service.client;
 
-import cl.rivendel.csv.helper.FtpHelper;
 import cl.rivendel.csv.model.imgbb.ImgBBResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -16,21 +15,48 @@ import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
-@Service
-public class ImgBBClient implements FtpClient {
+@Component
+public class ImgBBFtpHelper implements FTPClient {
 
-    private static final Logger log = LoggerFactory.getLogger(FtpClient.class);
-
-    @Value("${imgbb.apikey}")
+    private static final Logger log = LoggerFactory.getLogger(ImgBBFtpHelper.class);
     private String imgBBApiKey;
 
-    public String uploadImage(String base64Image, String imgName) throws IOException {
+    public ImgBBFtpHelper(@Value("${imgbb.apikey}") String imgBBApiKey){
+        this.imgBBApiKey = imgBBApiKey;
+    }
+
+    public void uploadImages(Map<String, String> setImages) {
+        log.trace("apikey: {}", imgBBApiKey);
+        for (Map.Entry<String, String> entry: setImages.entrySet()) {
+            try {
+                String base64Image = getBase64Image(entry.getValue());
+                entry.setValue(uploadImage(base64Image, entry.getKey()));
+            }catch (IOException ioException){
+                log.error("IOException while uploading image...");
+            }
+        }
+    }
+
+    private String getBase64Image(String imgPath) {
+        try {
+            return Base64.getEncoder().encodeToString(Files.readAllBytes(
+                    Paths.get(imgPath)));
+        } catch (IOException ex){
+            return "";
+        }
+    }
+
+    private String uploadImage(String base64Image, String imgName) throws IOException {
         log.trace("uploading base64Image={}, imgName={}", base64Image, imgName);
         String returnValue = "";
         CloseableHttpClient httpclient = null;
@@ -70,4 +96,5 @@ public class ImgBBClient implements FtpClient {
         }
         return returnValue;
     }
+
 }

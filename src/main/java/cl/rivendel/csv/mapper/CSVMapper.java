@@ -2,15 +2,14 @@ package cl.rivendel.csv.mapper;
 
 import cl.rivendel.csv.model.jumpseller.CSVModel;
 import cl.rivendel.csv.model.scryfall.Card;
+import cl.rivendel.csv.utils.Constants;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
 @Mapper(componentModel = "spring")
 public abstract class CSVMapper {
-    static final String P_OPENING = "<p>";
-    static final String P_CLOSING = "</p>";
-    static final String CREATURE = "creature";
+
 
     @Mappings({
             @Mapping(expression = "java(generateCardName(card))", target = "name"),
@@ -102,32 +101,32 @@ public abstract class CSVMapper {
                 .append("</h1>")
                 .append("\n")
 
-                .append(P_OPENING)
+                .append(Constants.P_OPENING)
                 .append(card.getTypeLine())
-                .append(P_CLOSING)
+                .append(Constants.P_CLOSING)
                 .append("\n")
 
-                .append(P_OPENING)
+                .append(Constants.P_OPENING)
                 .append(card.getOracleText() != null ? card.getOracleText().replace("\n", "</br>").replace("\r", "") : "")
-                .append(P_CLOSING)
+                .append(Constants.P_CLOSING)
                 .append("\n");
-        if (card.getTypeLine().toUpperCase().contains(CREATURE.toUpperCase())) {
-            sb.append(P_OPENING)
+        if (card.getTypeLine().toUpperCase().contains(Constants.CREATURE.toUpperCase())) {
+            sb.append(Constants.P_OPENING)
                     .append(card.getPower())
                     .append("/")
                     .append(card.getToughness())
-                    .append(P_CLOSING)
+                    .append(Constants.P_CLOSING)
                     .append("\n");
         }
 
         if (card.getTypeLine().toUpperCase().contains("PLANESWALKER")) {
-            sb.append(P_OPENING)
+            sb.append(Constants.P_OPENING)
                     .append("Loyalty: ")
                     .append(card.getLoyalty())
-                    .append(P_CLOSING).append("\n");
+                    .append(Constants.P_CLOSING).append("\n");
         }
 
-        sb.append(P_OPENING)
+        sb.append(Constants.P_OPENING)
                 .append("Illustrated by ")
                 .append("<a href='https://scryfall.com/search?q=a%3A%E2%80%9C")
                 .append(card.getArtist().replace(" ", "+"))
@@ -135,7 +134,7 @@ public abstract class CSVMapper {
                 .append(">")
                 .append(card.getArtist())
                 .append("</a>")
-                .append(P_CLOSING)
+                .append(Constants.P_CLOSING)
                 .append("\n")
                 .toString();
 
