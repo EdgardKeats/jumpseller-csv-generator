@@ -145,6 +145,12 @@ public class Card {
     private String pennyRank;
     @JsonProperty("attraction_lights")
     private int[] attractionLights;
-
-
+    @JsonProperty("printed_name")
+    private String printedName;
+    @JsonProperty("printed_type_line")
+    private String printedTypeLine;
+    @JsonProperty("printed_text")
+    private String printedText;
+    @JsonProperty("variation_of")
+    private String variationOf;
 }

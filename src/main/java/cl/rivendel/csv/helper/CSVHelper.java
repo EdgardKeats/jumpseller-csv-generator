@@ -9,7 +9,6 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +26,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CSVHelper {
     private static final Logger log = LoggerFactory.getLogger(CSVHelper.class);
 
     private CSVMapper csvMapper;
+
+    public CSVHelper(@Autowired CSVMapper csvMapper) {
+        super();
+        this.csvMapper = csvMapper;
+    }
+
 
     public void generateJumpSellerCSV(List<CSVModel> csvCards, String outputFileName) {
         try(Writer writer = new FileWriter(outputFileName)) {
@@ -57,7 +61,12 @@ public class CSVHelper {
     public List<CSVModel> cardListToCsvModelList(List<Card> cardList) {
         List<CSVModel> returnedList = new ArrayList<>();
         for (Card card: cardList) {
-            returnedList.add(csvMapper.toCsvModel(card));
+            try {
+                returnedList.add(csvMapper.toCsvModel(card));
+            } catch (Exception e){
+                log.error("Error during csv model creation", e);
+                log.error("Card name={}", card.getName());
+            }
         }
         return returnedList;
     }

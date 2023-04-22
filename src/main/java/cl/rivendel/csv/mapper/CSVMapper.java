@@ -27,23 +27,18 @@ public abstract class CSVMapper {
             @Mapping(constant = "0", target = "stock"),
             @Mapping(constant = "NO", target = "stockUnlimited"),
             @Mapping(constant = "0.0", target = "price"),
-
             @Mapping(constant = "Idioma", target = "variantOneOptionName"),
             @Mapping(constant = "option", target = "variantOneOptionType"),
             @Mapping(constant = "Ingles", target = "variantOneOptionValue"),
-
             @Mapping(constant = "Color", target = "customFieldOneLabel"),
             @Mapping(expression = "java(processColorIdentity(card.getColorIdentity()))", target = "customFieldOneValue"),
             @Mapping(constant = "selection", target = "customFieldOneType"),
-
             @Mapping(constant = "Edicion", target = "customFieldTwoLabel"),
             @Mapping(source = "card.setName", target = "customFieldTwoValue"),
             @Mapping(constant = "selection", target = "customFieldTwoType"),
-
             @Mapping(constant = "Rareza", target = "customFieldFourLabel"),
             @Mapping(source = "card.rarity", target = "customFieldFourValue"),
             @Mapping(constant = "selection", target = "customFieldFourType"),
-
             @Mapping(constant = "Tipo de carta", target = "customFieldThreeLabel"),
             @Mapping(source = "card.typeLine", target = "customFieldThreeValue"),
             @Mapping(constant = "selection", target = "customFieldThreeType"),

@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.Map;
 import java.util.Scanner;
 
 @SpringBootApplication
-@EnableFeignClients
 public class Application implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
@@ -126,7 +124,7 @@ public class Application implements CommandLineRunner {
         }
 
         set = tempMap.get(menuSelector(scanner, tempMap));
-        return scryfallHelper.getSetCards(scryfallHelper.getOracleCardsURL(), set);
+        return scryfallHelper.getSetCards(scryfallHelper.getAllCardsURL(), set);
     }
 
     private void testGenerateCSV() {
