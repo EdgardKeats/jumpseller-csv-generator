@@ -16,18 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +33,8 @@ import java.util.stream.Collectors;
 public class ScryfallHelper {
 
     private static final Logger log = LoggerFactory.getLogger(ScryfallHelper.class);
-    private ScryfallClient scryfallClient;
-    private boolean skipHighRes;
+    private final ScryfallClient scryfallClient;
+    private final boolean skipHighRes;
 
     public ScryfallHelper(@Autowired ScryfallClient scryfallClient, @Value("${csvGenProperty.skipHighResImage:true}") boolean skipHighRes){
         this.scryfallClient = scryfallClient;
@@ -84,19 +79,19 @@ public class ScryfallHelper {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Card> cards = new ArrayList<>();
         File jsonFile = new File(jsonFileName);
-        try (LineIterator it = FileUtils.lineIterator(jsonFile, "UTF-8");){
+        try (LineIterator it = FileUtils.lineIterator(jsonFile, "UTF-8")){
             while (it.hasNext()) {
                 try{
                     String line = it.nextLine();
                     Card card = objectMapper.readValue(line, new TypeReference<Card>() {});
                     if(card.getSet().trim().equalsIgnoreCase(set) && (card.getLang().equalsIgnoreCase(Constants.ENGLISH) || card.getLang().equalsIgnoreCase(Constants.SPANISH)) ) cards.add(card);
                 } catch (Exception e){
-                    log.error("Error durante parseo");
+                    log.error("Error during file line to card object parsing");
                     log.error(e.getMessage());
                 }
             }
         } catch (IOException e){
-            log.error("Error durante creacion de listado de cards");
+            log.error("Error creating the card list");
             log.error(e.getMessage());
         } 
         return cards;
@@ -108,7 +103,7 @@ public class ScryfallHelper {
         if(!file.exists()){
             log.info("Creating new json file with name {}", jsonFileName);
             ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(jsonUrl).openStream());
-            try(FileOutputStream fileOutputStream = new FileOutputStream(jsonFileName);){
+            try(FileOutputStream fileOutputStream = new FileOutputStream(jsonFileName)){
                 fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
             }
             log.info("File downloaded");
@@ -130,8 +125,8 @@ public class ScryfallHelper {
                 if (card.getImageUris() != null && (skipHighRes || card.getImageStatus().equalsIgnoreCase(Constants.HIGH_RES_SCAN))) {
                     try {
                         ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(card.getImageUris().get(Constants.PNG)).openStream());
-                        String fileName = Constants.ORACLE_CARDS_FOLDER + card.getName().replace(Constants.FORWARD_SLASH, Constants.HYPHEN) + Constants.HYPHEN + card.getSet()  + Constants.HYPHEN + card.getLang() + Constants.PNG_EXTENSION;
-                        try(FileOutputStream fileOutputStream = new FileOutputStream(fileName);){
+                        String fileName = createCardName(card);
+                        try(FileOutputStream fileOutputStream = new FileOutputStream(fileName)){
                             fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
                         }
                         downloadedCardsNames.put(card.getCollectorNumber(), fileName);
@@ -141,6 +136,24 @@ public class ScryfallHelper {
                 }
             }
         return downloadedCardsNames;
+    }
+
+    /**
+     * Will return the card name with the following format
+     * oracleCards/nameWithoutSlashes-setName-collectorNumber-languages.png
+     * @param card
+     * @return
+     */
+    private String createCardName(Card card) {
+        return Constants.ORACLE_CARDS_FOLDER +
+                card.getName().replace(Constants.FORWARD_SLASH, Constants.HYPHEN) +
+                Constants.HYPHEN +
+                card.getSet() +
+                Constants.HYPHEN  +
+                card.getCollectorNumber() +
+                Constants.HYPHEN +
+                card.getLang() +
+                Constants.PNG_EXTENSION;
     }
 
     public Map<String, String> getSets() {

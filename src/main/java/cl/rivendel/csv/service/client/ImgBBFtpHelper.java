@@ -29,7 +29,7 @@ import java.util.Map;
 public class ImgBBFtpHelper implements FTPClient {
 
     private static final Logger log = LoggerFactory.getLogger(ImgBBFtpHelper.class);
-    private String imgBBApiKey;
+    private final String imgBBApiKey;
 
     public ImgBBFtpHelper(@Value("${imgbb.apikey}") String imgBBApiKey){
         this.imgBBApiKey = imgBBApiKey;

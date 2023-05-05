@@ -14,3 +14,4 @@ buildNumber.properties
 resources/application.properties
 #ignore json files generated
 *.json
+*-list.csv

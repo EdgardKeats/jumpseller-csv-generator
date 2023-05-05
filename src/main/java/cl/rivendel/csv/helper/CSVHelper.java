@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class CSVHelper {
     private static final Logger log = LoggerFactory.getLogger(CSVHelper.class);
 
-    private CSVMapper csvMapper;
+    private final CSVMapper csvMapper;
 
     public CSVHelper(@Autowired CSVMapper csvMapper) {
         super();

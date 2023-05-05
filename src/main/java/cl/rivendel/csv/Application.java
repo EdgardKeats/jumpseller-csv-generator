@@ -47,17 +47,15 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (testRun) {
-            testGenerateCSV();
-        } else {
+
             try {
 
                 Scanner scanner = new Scanner(System.in);
-                System.out.println("Cargando listado de cartas");
+                System.out.println("Loading card list");
                 Map<String, List<Set>> mapOfSetLists = scryfallHelper.getSetsDividedByType();
 
                 int contador = 1;
-                String setType = "";
+                String setType;
                 Map<Integer, String> tempMap = new HashMap<>();
                 for (Map.Entry<String, List<Set>> entry : mapOfSetLists.entrySet()) {
                     System.out.print(contador + ") ");
@@ -82,14 +80,13 @@ public class Application implements CommandLineRunner {
                     System.out.println("creating csv models");
                     List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
                     System.out.println("creating jumpseller csv file");
-                    String nowName = "AWO-list";
-                    csvHelper.generateJumpSellerCSV(listCSVModel, ".\\" + nowName + ".csv");
+                    csvHelper.generateJumpSellerCSV(listCSVModel, ".\\" + setType + "-list.csv");
                 }
-                System.out.println("Fin de generacion! :D");
+                System.out.println("CSV File generation finished! :D");
             } catch (Exception e) {
                 System.out.println(e);
             }
-        }
+
     }
 
     private int menuSelector(Scanner scanner, Map<Integer, String> menuValues) {
@@ -125,44 +122,5 @@ public class Application implements CommandLineRunner {
 
         set = tempMap.get(menuSelector(scanner, tempMap));
         return scryfallHelper.getSetCards(scryfallHelper.getAllCardsURL(), set);
-    }
-
-    private void testGenerateCSV() {
-        try {
-            Map<String, String> cardNames;
-            log.info("getting sets");
-            Map<String, String> setMap = scryfallHelper.getSets();
-
-            log.info("getting base json");
-            String baseJsonUrl = scryfallHelper.getOracleCardsURL();
-            String firstFoundSet = "snc";
-
-            log.info("getting cards from set: {}", setMap.get(firstFoundSet));
-            List<Card> cardsList = scryfallHelper.testGetSetCards(baseJsonUrl, firstFoundSet);
-
-            if (!cardsList.isEmpty()) {
-                if (createImages) {
-                    log.info("getting {} cards images", cardsList.size());
-                    cardNames = scryfallHelper.getOracleCardsImages(cardsList);
-
-                    log.info("processing card images");
-                    cardImageHelper.createJumpsellerImages(cardNames);
-
-                    log.info("uploading jumpseller images to image server");
-                    ftpHelper.uploadImages(cardNames);
-
-                    log.info("updating csv file with card images urls");
-                    csvHelper.updateImagesUris(cardsList, cardNames);
-                }
-
-                log.info("creating csv models");
-                List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
-
-                log.info("creating jumpseller csv file");
-                csvHelper.generateJumpSellerCSV(listCSVModel, "C:\\SimpleSolution\\SNC.csv");
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
     }
 }
