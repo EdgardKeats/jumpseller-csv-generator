@@ -1,4 +1,4 @@
-package cl.rivendel.csv.service.client;
+package cl.rivendel.csv.service;
 
 import org.springframework.stereotype.Component;
 

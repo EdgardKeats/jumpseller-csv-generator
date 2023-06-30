@@ -79,7 +79,8 @@ public abstract class CSVMapper {
     }
 
     public String generateCategory(Card card) {
-        return "Magic Singles,Magic Singles /" + card.getSetName();
+        String anio = card.getReleasedAt().substring(0,4);
+        return "MTG Singles "+anio + ",MTG Singles " +  anio + " /" + card.getSetName();
     }
 
     public String generateCardName(Card card) {

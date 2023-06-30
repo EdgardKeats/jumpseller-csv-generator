@@ -1,6 +1,7 @@
 package cl.rivendel.csv.service.client;
 
 import cl.rivendel.csv.model.imgbb.ImgBBResponse;
+import cl.rivendel.csv.service.FTPClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;

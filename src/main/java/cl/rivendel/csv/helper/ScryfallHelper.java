@@ -3,7 +3,7 @@ package cl.rivendel.csv.helper;
 import cl.rivendel.csv.model.scryfall.BulkData;
 import cl.rivendel.csv.model.scryfall.Card;
 import cl.rivendel.csv.model.scryfall.Set;
-import cl.rivendel.csv.service.client.ScryfallClient;
+import cl.rivendel.csv.service.ScryfallClient;
 import cl.rivendel.csv.utils.Constants;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,26 +45,12 @@ public class ScryfallHelper {
         return scryfallClient.getBulkData().getData().stream().filter(bulk->bulk.getType().equalsIgnoreCase(bulkDataType)).findFirst().map(BulkData::getDownloadUri).get();
     }
 
-    public String getOracleCardsURL() {
-        log.info("Attempting to get ORACLE cards");
-        return getCardsURL(Constants.ORACLE_CARDS);
-    }
-
     public String getAllCardsURL(){
         log.info("Attempting to get ALL cards");
         return getCardsURL(Constants.ALL_CARDS);
     }
     public List<Card> getSetCards(String jsonUrl, String set) {
     log.info("attempting to download cards file from {}, for the set {}", jsonUrl, set);
-        try {
-            return getCardsFromJsonURL(jsonUrl, set);
-        } catch (IOException ex) {
-            log.error(ex.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
-    public List<Card> testGetSetCards(String jsonUrl, String set) {
         try {
             return getCardsFromJsonURL(jsonUrl, set);
         } catch (IOException ex) {
@@ -84,7 +70,7 @@ public class ScryfallHelper {
                 try{
                     String line = it.nextLine();
                     Card card = objectMapper.readValue(line, new TypeReference<Card>() {});
-                    if(card.getSet().trim().equalsIgnoreCase(set) && (card.getLang().equalsIgnoreCase(Constants.ENGLISH) || card.getLang().equalsIgnoreCase(Constants.SPANISH)) ) cards.add(card);
+                    if(card.getSet().trim().equalsIgnoreCase(set) && (card.getLang().equalsIgnoreCase(Constants.ENGLISH))) cards.add(card);
                 } catch (Exception e){
                     log.error("Error during file line to card object parsing");
                     log.error(e.getMessage());
@@ -154,10 +140,6 @@ public class ScryfallHelper {
                 Constants.HYPHEN +
                 card.getLang() +
                 Constants.PNG_EXTENSION;
-    }
-
-    public Map<String, String> getSets() {
-        return scryfallClient.getAllSets().getData().stream().collect(Collectors.toMap(Set::getCode, Set::getName));
     }
 
     public Map<String, List<Set>> getSetsDividedByType() {

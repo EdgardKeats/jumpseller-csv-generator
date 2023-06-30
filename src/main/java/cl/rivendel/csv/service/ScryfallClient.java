@@ -1,4 +1,4 @@
-package cl.rivendel.csv.service.client;
+package cl.rivendel.csv.service;
 
 import cl.rivendel.csv.model.scryfall.AllBulkData;
 import cl.rivendel.csv.model.scryfall.BulkData;

@@ -1,9 +1,9 @@
 package cl.rivendel.csv.configuration;
 
+import cl.rivendel.csv.service.ScryfallClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import cl.rivendel.csv.service.client.ScryfallClient;
 import feign.Feign;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
