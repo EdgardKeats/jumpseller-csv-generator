@@ -153,4 +153,7 @@ public class Card {
     private String printedText;
     @JsonProperty("variation_of")
     private String variationOf;
+    @JsonProperty("purchase_uris")
+    private Map<String, String> purchaseUris;
+
 }

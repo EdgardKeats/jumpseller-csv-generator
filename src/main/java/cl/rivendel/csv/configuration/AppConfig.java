@@ -13,7 +13,7 @@ public class AppConfig {
     
     @Bean
     public ScryfallClient scryfallClient(){
-        //https://api.scryfall.com/
         return Feign.builder().encoder(new JacksonEncoder()).decoder(new JacksonDecoder()).target(ScryfallClient.class, "https://api.scryfall.com/");
     }
+
 }

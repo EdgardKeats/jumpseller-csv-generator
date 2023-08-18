@@ -83,8 +83,8 @@ public class ScryfallHelper {
         return cards;
     }
 
-    private String saveJSONFile(String jsonUrl) throws IOException {
-        String jsonFileName = "Cards-"+getFileNameFromURL(jsonUrl); 
+    public String saveJSONFile(String jsonUrl) throws IOException {
+        String jsonFileName = "Cards.json";
         File file = new File(jsonFileName);
         if(!file.exists()){
             log.info("Creating new json file with name {}", jsonFileName);
@@ -108,7 +108,7 @@ public class ScryfallHelper {
         Map<String, String> downloadedCardsNames = new HashMap<>();
         new File(Constants.ORACLE_CARDS_FOLDER).mkdir();
             for (Card card : cardList) {
-                if (card.getImageUris() != null && (skipHighRes || card.getImageStatus().equalsIgnoreCase(Constants.HIGH_RES_SCAN))) {
+                if (card.getImageUris() != null) {
                     try {
                         ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(card.getImageUris().get(Constants.PNG)).openStream());
                         String fileName = createCardName(card);
@@ -118,7 +118,9 @@ public class ScryfallHelper {
                         downloadedCardsNames.put(card.getCollectorNumber(), fileName);
                     } catch (IOException ioException) {
                         log.error("IoException while downloading card image", ioException);
-                    } 
+                    }
+                } else {
+                    log.info("The card {} might be double-faced card, downloading only one face, skipping");
                 }
             }
         return downloadedCardsNames;
