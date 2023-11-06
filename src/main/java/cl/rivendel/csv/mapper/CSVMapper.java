@@ -84,9 +84,16 @@ public abstract class CSVMapper {
     }
 
     public String generateCardName(Card card) {
-        return card.getName() +
-                " #" +
-                String.format("%03d", Integer.parseInt(card.getCollectorNumber()));
+        String returnedValue = "";
+        try {
+            int collectorNumber = Integer.parseInt(card.getCollectorNumber());
+            returnedValue = card.getName() +
+                    " #" +
+                    String.format("%03d", collectorNumber);
+        } catch (NumberFormatException numberFormatException){
+            returnedValue = card.getName() + " #" + card.getCollectorNumber();
+        }
+        return returnedValue;
     }
 
     public String generateCardDescription(Card card) {

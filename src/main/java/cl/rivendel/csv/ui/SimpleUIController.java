@@ -11,9 +11,10 @@ import javafx.application.HostServices;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -21,11 +22,13 @@ import java.util.stream.Collectors;
 
 @Component
 public class SimpleUIController {
-    private HostServices hostServices;
-    private ScryfallHelper scryfallHelper;
-    private CardImageHelper cardImageHelper;
-    private FTPClient ftpHelper;
-    private CSVHelper csvHelper;
+    private final HostServices hostServices;
+    private final ScryfallHelper scryfallHelper;
+    private final CardImageHelper cardImageHelper;
+    private final FTPClient ftpHelper;
+    private final CSVHelper csvHelper;
+
+    private static final Logger log = LoggerFactory.getLogger(SimpleUIController.class);
 
 
     SimpleUIController(HostServices hostServices, ScryfallHelper scryfallHelper, CardImageHelper cardImageHelper, FTPClient ftpHelper, CSVHelper csvHelper) {
@@ -51,6 +54,9 @@ public class SimpleUIController {
     @FXML
     public TextArea txtLog;
 
+    @FXML
+    public TextField txtImgBBKey;
+
     private Map<String, List<Set>> setMap;
 
     @FXML
@@ -58,12 +64,65 @@ public class SimpleUIController {
         this.setMap =  scryfallHelper.getSetsDividedByType();
         this.cboSetType.setItems(prepareSetTypeList());
         this.cboSetType.setOnAction(actionEvent -> this.cboSet.setItems(changeSetCombo()));
-        this.btnGenerateCSV.setOnAction(this::generateCSV);
+        this.btnGenerateCSV.setOnAction(this::startGeneration);
         this.btnClearForm.setOnAction(this::clearForm);
         this.btnUpdateDB.setOnAction(this::updateDB);
     }
 
+    private void startGeneration(ActionEvent actionEvent) {
+        if (this.txtImgBBKey.getText().isEmpty()){
+            log.error("No se ha ingresado una API Key para iniciar la ejecución, no se subirán imágenes");
+        }
+        Thread newThread = new Thread(() -> {
+            try {
+                disableControls();
+                generateCSV();
+            } catch (Exception e){
+                   log.error("Error generating CSV...");
+                   log.error(e.getMessage());
+            } finally {
+                enableControls();
+            }
+        });
+        newThread.start();
+    }
+
+    private void enableControls() {
+        this.btnGenerateCSV.setDisable(false);
+        this.btnUpdateDB.setDisable(false);
+        this.btnClearForm.setDisable(false);
+        this.cboSetType.setDisable(false);
+        this.cboSet.setDisable(false);
+        this.txtImgBBKey.setDisable(false);
+    }
+
+    private void disableControls() {
+        this.btnGenerateCSV.setDisable(true);
+        this.btnUpdateDB.setDisable(true);
+        this.btnClearForm.setDisable(true);
+        this.cboSetType.setDisable(true);
+        this.cboSet.setDisable(true);
+        this.txtImgBBKey.setDisable(true);
+    }
+
+
     private void updateDB(ActionEvent actionEvent) {
+        Thread newThread = new Thread(() -> {
+            try {
+                disableControls();
+                downloadCSV();
+            } catch (Exception e){
+                log.error("Error generating CSV...");
+                log.error(e.getMessage());
+            } finally {
+                enableControls();
+            }
+        });
+        newThread.start();
+
+    }
+
+    private void downloadCSV(){
         try{
             printToLogView("Updating base file");
             scryfallHelper.saveJSONFile(scryfallHelper.getAllCardsURL());
@@ -72,7 +131,6 @@ public class SimpleUIController {
             printToLogView("Something happened while downloading the new file");
             printToLogView(ex.getMessage());
         }
-
     }
 
     private void clearForm(ActionEvent actionEvent) {
@@ -80,23 +138,22 @@ public class SimpleUIController {
         this.cboSetType.getSelectionModel().clearSelection();
     }
 
-    private void generateCSV(ActionEvent actionEvent) {
+    private void generateCSV() {
         try {
-
             printToLogView("Starting... please wait a few minutes");
             String setName = this.cboSet.getValue();
             String set = this.setMap.get(cboSetType.getValue()).stream().filter(m -> m.getName().equalsIgnoreCase(setName)).findFirst().get().getCode();
             List<Card> cardsList = scryfallHelper.getSetCards(scryfallHelper.getAllCardsURL(), set);
             if (!cardsList.isEmpty()) {
-                printToLogView("Generating images...");
                 Map<String, String> cardNames;
                 if(this.chkUploadImages.isSelected()){
+                    printToLogView("Generating images...");
                     printToLogView("getting " + cardsList.size() + " cards images");
                     cardNames = scryfallHelper.getOracleCardsImages(cardsList);
                     printToLogView("processing card images");
                     cardImageHelper.createJumpsellerImages(cardNames);
                     printToLogView("uploading jumpseller images to image server");
-                    ftpHelper.uploadImages(cardNames);
+                    ftpHelper.uploadImages(cardNames, this.txtImgBBKey.getText());
                     printToLogView("updating csv file with card images urls");
                     csvHelper.updateImagesUris(cardsList, cardNames);
                 }
@@ -129,16 +186,11 @@ public class SimpleUIController {
             return FXCollections.observableList(new ArrayList<>());
     }
 
-    private void printToLogView(String log){
-        StringBuilder sb = new StringBuilder();
-        if(!txtLog.getText().isEmpty()) {
-            sb.append(this.txtLog.getText());
-            sb.append("\n");
-        }
-        sb.append(log);
-        this.txtLog.setText(sb.toString());
+    private void printToLogView(String logString){
 
-    };
+        log.info(logString);
+        this.txtLog.appendText(logString+"\n");
+    }
 
     private void showMessage(String title, String header, String message){
 

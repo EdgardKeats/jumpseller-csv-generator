@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,9 @@ public class CommandLineRunner {
     private CSVHelper csvHelper;
     @Autowired
     private FTPClient ftpHelper;
+
+    @Value("${imgbb.apikey}")
+    private String imgBbAPIKey;
 
     public void run(String... args) {
         commandLineRun();
@@ -60,7 +64,7 @@ public class CommandLineRunner {
                 System.out.println("processing card images");
                 cardImageHelper.createJumpsellerImages(cardNames);
                 System.out.println("uploading jumpseller images to image server");
-                ftpHelper.uploadImages(cardNames);
+                ftpHelper.uploadImages(cardNames, imgBbAPIKey);
                 System.out.println("updating csv file with card images urls");
                 csvHelper.updateImagesUris(cardsList, cardNames);
                 System.out.println("creating csv models");

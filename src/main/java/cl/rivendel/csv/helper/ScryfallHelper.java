@@ -33,6 +33,8 @@ import java.util.stream.Collectors;
 public class ScryfallHelper {
 
     private static final Logger log = LoggerFactory.getLogger(ScryfallHelper.class);
+    private static final String JSON_FILE_NAME = "Cards.json";
+
     private final ScryfallClient scryfallClient;
     private final boolean skipHighRes;
 
@@ -84,19 +86,27 @@ public class ScryfallHelper {
     }
 
     public String saveJSONFile(String jsonUrl) throws IOException {
-        String jsonFileName = "Cards.json";
-        File file = new File(jsonFileName);
+        File file = new File(JSON_FILE_NAME);
         if(!file.exists()){
-            log.info("Creating new json file with name {}", jsonFileName);
+            log.info("Creating new json file with name {}", JSON_FILE_NAME);
             ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(jsonUrl).openStream());
-            try(FileOutputStream fileOutputStream = new FileOutputStream(jsonFileName)){
+            try(FileOutputStream fileOutputStream = new FileOutputStream(JSON_FILE_NAME)){
                 fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
             }
             log.info("File downloaded");
         } else {
-            log.info("File {} already exists! ", jsonFileName);
+            log.info("File {} already exists! ", JSON_FILE_NAME);
         }
-        return jsonFileName;
+        return JSON_FILE_NAME;
+    }
+
+    private void deleteBaseJsonFile() {
+        log.info("Attempting to erase existing base file");
+        File file = new File(JSON_FILE_NAME);
+        if (file.delete())
+            log.info("Base file deleted!");
+        else
+            log.info("The base file has not been deleted");
     }
 
     private String getFileNameFromURL(String jsonUrl) {

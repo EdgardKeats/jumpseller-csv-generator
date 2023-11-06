@@ -5,15 +5,17 @@
 
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cl.rivendel.csv.ui.SimpleUIController">
          <children>
-            <Label layoutX="32.0" layoutY="67.0" prefWidth="54.0" text="Set type:" />
+            <Label layoutX="51.0" layoutY="62.0" prefWidth="54.0" text="Set type:" />
             <ComboBox fx:id="cboSetType" layoutX="117.0" layoutY="63.0" prefHeight="26.0" prefWidth="439.0" />
-            <Label layoutX="59.0" layoutY="110.0" text="Set:" />
+            <Label layoutX="78.0" layoutY="105.0" text="Set:" />
             <ComboBox fx:id="cboSet" layoutX="117.0" layoutY="106.0" prefHeight="26.0" prefWidth="438.0" />
-            <CheckBox fx:id="chkUploadImages" layoutX="117.0" layoutY="157.0" mnemonicParsing="false" text="Subir imágenes a ImgBB (Generar URLs imágenes en CSV)" />
-            <Button fx:id="btnUpdateDB" layoutX="263.0" layoutY="283.0" mnemonicParsing="false" text="Actualizar base de datos" />
-            <Button fx:id="btnClearForm" layoutX="413.0" layoutY="283.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="146.0" text="Limpiar formulario" />
-            <Button fx:id="btnGenerateCSV" layoutX="414.0" layoutY="319.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="144.0" text="Generar CSV" />
-             <Label layoutX="57.0" layoutY="200.0" text="Log:" />
-             <TextArea fx:id="txtLog" layoutX="117.0" layoutY="200.0" prefHeight="64.0" prefWidth="438.0" />
+            <CheckBox fx:id="chkUploadImages" layoutX="117.0" layoutY="183.0" mnemonicParsing="false" text="Subir imágenes a ImgBB (Generar URLs imágenes en CSV)" />
+            <Button fx:id="btnUpdateDB" layoutX="263.0" layoutY="307.0" mnemonicParsing="false" text="Actualizar base de datos" />
+            <Button fx:id="btnClearForm" layoutX="413.0" layoutY="307.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="146.0" text="Limpiar formulario" />
+            <Button fx:id="btnGenerateCSV" layoutX="414.0" layoutY="345.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="144.0" text="Generar CSV" />
+             <Label layoutX="37.0" layoutY="149.0" text="ImgBB Key:" />
+             <TextField fx:id="txtImgBBKey" layoutX="116.0" layoutY="145.0" prefHeight="25.0" prefWidth="438.0" />
+             <Label layoutX="76.0" layoutY="212.0" text="Log:" />
+             <TextArea fx:id="txtLog" layoutX="116.0" layoutY="217.0" prefHeight="64.0" prefWidth="438.0" />
          </children>
 </Pane>

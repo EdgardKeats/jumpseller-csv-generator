@@ -18,6 +18,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -30,18 +33,13 @@ import java.util.Map;
 public class ImgBBFtpHelper implements FTPClient {
 
     private static final Logger log = LoggerFactory.getLogger(ImgBBFtpHelper.class);
-    private final String imgBBApiKey;
 
-    public ImgBBFtpHelper(@Value("${imgbb.apikey}") String imgBBApiKey){
-        this.imgBBApiKey = imgBBApiKey;
-    }
-
-    public void uploadImages(Map<String, String> setImages) {
+    public void uploadImages(Map<String, String> setImages, String imgBBApiKey) {
         log.trace("apikey: {}", imgBBApiKey);
         for (Map.Entry<String, String> entry: setImages.entrySet()) {
             try {
                 String base64Image = getBase64Image(entry.getValue());
-                entry.setValue(uploadImage(base64Image, entry.getKey()));
+                entry.setValue(uploadImage(base64Image, entry.getKey(), imgBBApiKey));
             }catch (IOException ioException){
                 log.error("IOException while uploading image...");
             }
@@ -57,7 +55,7 @@ public class ImgBBFtpHelper implements FTPClient {
         }
     }
 
-    private String uploadImage(String base64Image, String imgName) throws IOException {
+    private String uploadImage(String base64Image, String imgName, String imgBBApiKey) throws IOException {
         log.trace("uploading base64Image={}, imgName={}", base64Image, imgName);
         String returnValue = "";
         CloseableHttpClient httpclient = null;
@@ -84,7 +82,9 @@ public class ImgBBFtpHelper implements FTPClient {
                 log.trace("new value! {}", returnValue);
 
             } else {
+                //TODO: Keep file name so it can be uploaded later or implement a retry mechanism
                 log.error("Non 200 response from ftp service: {} {}", response2.getCode(), response2.getReasonPhrase());
+                addToFailedUploadReport(imgName);
             }
 
         } catch (IOException | ParseException e) {
@@ -96,6 +96,14 @@ public class ImgBBFtpHelper implements FTPClient {
             }
         }
         return returnValue;
+    }
+
+    private void addToFailedUploadReport(String imgName) {
+        try (FileWriter fileWriter = new FileWriter("FailedUpload.txt");) {
+            fileWriter.append(imgName).append("\n");
+        } catch (IOException e) {
+            log.error("The report file could not be written for image {}", imgName);
+        }
     }
 
 }

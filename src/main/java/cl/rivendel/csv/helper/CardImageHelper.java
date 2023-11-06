@@ -30,7 +30,7 @@ public class CardImageHelper {
     public void redrawImage(String cardPath) throws IOException {
         File file = new File(cardPath);
         BufferedImage bi = ImageIO.read(file);
-        int desiredSize = bi.getHeight(); //set image height
+        int desiredSize = bi.getHeight();
         BufferedImage resizedImage = new BufferedImage(desiredSize, desiredSize, BufferedImage.TYPE_INT_RGB);
 
         Graphics2D g = resizedImage.createGraphics();

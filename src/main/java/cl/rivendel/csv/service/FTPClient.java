@@ -7,6 +7,6 @@ import java.util.Map;
 @Component
 public interface FTPClient {
 
-    void uploadImages(Map<String, String> setImages);
+    void uploadImages(Map<String, String> setImages, String imgBBApiKey);
 
 }
