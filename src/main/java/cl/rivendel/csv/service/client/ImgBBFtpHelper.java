@@ -36,14 +36,14 @@ public class ImgBBFtpHelper implements FTPClient {
 
     public void uploadImages(Map<String, String> setImages, String imgBBApiKey) {
         log.trace("apikey: {}", imgBBApiKey);
-        for (Map.Entry<String, String> entry: setImages.entrySet()) {
-            try {
-                String base64Image = getBase64Image(entry.getValue());
-                entry.setValue(uploadImage(base64Image, entry.getKey(), imgBBApiKey));
-            }catch (IOException ioException){
-                log.error("IOException while uploading image...");
-            }
-        }
+        setImages.entrySet().forEach(
+                entry -> {
+                    try {
+                        entry.setValue(uploadImage(getBase64Image(entry.getValue()), entry.getKey(), imgBBApiKey));
+                    } catch (IOException e) {
+                        log.error("IOException while uploading image...");
+                    }
+                });
     }
 
     private String getBase64Image(String imgPath) {

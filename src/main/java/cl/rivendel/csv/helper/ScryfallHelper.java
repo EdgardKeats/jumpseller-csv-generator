@@ -109,31 +109,34 @@ public class ScryfallHelper {
             log.info("The base file has not been deleted");
     }
 
-    private String getFileNameFromURL(String jsonUrl) {
-        String[] urlParts = jsonUrl.split("/");
-        return urlParts[urlParts.length-1];
-    }
-
     public Map<String, String> getOracleCardsImages(List<Card> cardList) throws Exception {
         Map<String, String> downloadedCardsNames = new HashMap<>();
         new File(Constants.ORACLE_CARDS_FOLDER).mkdir();
-            for (Card card : cardList) {
-                if (card.getImageUris() != null) {
-                    try {
-                        ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(card.getImageUris().get(Constants.PNG)).openStream());
-                        String fileName = createCardName(card);
-                        try(FileOutputStream fileOutputStream = new FileOutputStream(fileName)){
-                            fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-                        }
-                        downloadedCardsNames.put(card.getCollectorNumber(), fileName);
-                    } catch (IOException ioException) {
-                        log.error("IoException while downloading card image", ioException);
+        cardList.forEach(
+                card -> {
+                    if (card.getImageUris() != null) {
+                        downloadImage(downloadedCardsNames, card, card.getImageUris().get(Constants.PNG));
+                    } else {
+                        log.info("The card {} might be a double-faced card, downloading only one face", card.getName());
+                        downloadImage(downloadedCardsNames, card, card.getCardFaces().get(0).getImageUris().get(Constants.PNG));
                     }
-                } else {
-                    log.info("The card {} might be double-faced card, downloading only one face, skipping");
                 }
-            }
+        );
         return downloadedCardsNames;
+    }
+
+    private void downloadImage(Map<String, String> downloadedCardsNames, Card card, String imageURL){
+        try {
+            log.info("Image URL = {}", imageURL);
+            ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(imageURL).openStream());
+            String fileName = createCardName(card);
+            try(FileOutputStream fileOutputStream = new FileOutputStream(fileName)){
+                fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+            }
+            downloadedCardsNames.put(card.getCollectorNumber(), fileName);
+        } catch (IOException ioException) {
+            log.error("IoException while downloading card image", ioException);
+        }
     }
 
     /**
