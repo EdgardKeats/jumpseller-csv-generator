@@ -2,6 +2,7 @@ package cl.rivendel.csv;
 
 import cl.rivendel.csv.helper.CSVHelper;
 import cl.rivendel.csv.helper.CardImageHelper;
+import cl.rivendel.csv.helper.MTGJsonHelper;
 import cl.rivendel.csv.helper.ScryfallHelper;
 import cl.rivendel.csv.model.jumpseller.CSVModel;
 import cl.rivendel.csv.model.scryfall.Card;
@@ -12,13 +13,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-public class CommandLineRunner {
+//@Component
+public class CommandLineRunner {// implements org.springframework.boot.CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(CommandLineRunner.class);
 
@@ -30,15 +36,21 @@ public class CommandLineRunner {
     private CSVHelper csvHelper;
     @Autowired
     private FTPClient ftpHelper;
+    @Autowired
+    private MTGJsonHelper mtgJsonHelper;
 
     @Value("${imgbb.apikey}")
     private String imgBbAPIKey;
+
+    private boolean getPrices = true;
+    private boolean uploadImages = false;
 
     public void run(String... args) {
         commandLineRun();
     }
 
     private void commandLineRun() {
+
         try {
 
             Scanner scanner = new Scanner(System.in);
@@ -55,18 +67,27 @@ public class CommandLineRunner {
                 contador++;
             }
             setType = tempMap.get(menuSelector(scanner, tempMap));
-
-            List<Card> cardsList = showGetCardListMenu(scanner, mapOfSetLists.get(setType));
+            String set =  showGetCardListMenu(scanner, mapOfSetLists.get(setType));
+            List<Card> cardsList = scryfallHelper.getCardsFromJsonURL(scryfallHelper.getAllCardsURL(), set);
 
             if (!cardsList.isEmpty()) {
-                System.out.println("getting " + cardsList.size() + " cards images");
-                Map<String, String> cardNames = scryfallHelper.getOracleCardsImages(cardsList);
-                System.out.println("processing card images");
-                cardImageHelper.createJumpsellerImages(cardNames);
-                System.out.println("uploading jumpseller images to image server");
-                ftpHelper.uploadImages(cardNames, imgBbAPIKey);
-                System.out.println("updating csv file with card images urls");
-                csvHelper.updateImagesUris(cardsList, cardNames);
+                if(uploadImages) {
+                    System.out.println("getting " + cardsList.size() + " cards images");
+                    Map<String, String> cardNames = scryfallHelper.getOracleCardsImages(cardsList);
+                    System.out.println("processing card images");
+                    cardImageHelper.createJumpsellerImages(cardNames);
+                    System.out.println("uploading jumpseller images to image server");
+                    ftpHelper.uploadImages(cardNames, imgBbAPIKey);
+                    System.out.println("updating csv file with card images urls");
+                    csvHelper.updateImagesUris(cardsList, cardNames);
+                }
+                if(getPrices){
+                    List<cl.rivendel.csv.model.mtgjson.Card> cards = mtgJsonHelper.getCardsFromSetJSON(set);
+                    mtgJsonHelper.replaceUUID(cardsList, cards);
+                    Map<String, Float> cardPrices = mtgJsonHelper.getCardPrices();
+                    mtgJsonHelper.mergePrices(cardsList, cardPrices, 940);
+                    System.out.println("Cantidad de cartas con precio recuperadas: "+cards.size());
+                }
                 System.out.println("creating csv models");
                 List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
                 System.out.println("creating jumpseller csv file");
@@ -99,7 +120,7 @@ public class CommandLineRunner {
         return 0;
     }
 
-    private List<Card> showGetCardListMenu(Scanner scanner, List<Set> setList) {
+    private String showGetCardListMenu(Scanner scanner, List<Set> setList) throws IOException {
         int contador = 1;
         String set = "";
         Map<Integer, String> tempMap = new HashMap<>();
@@ -109,7 +130,6 @@ public class CommandLineRunner {
             contador++;
         }
 
-        set = tempMap.get(menuSelector(scanner, tempMap));
-        return scryfallHelper.getSetCards(scryfallHelper.getAllCardsURL(), set);
+        return tempMap.get(menuSelector(scanner, tempMap));
     }
 }

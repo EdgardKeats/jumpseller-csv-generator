@@ -26,7 +26,7 @@ public abstract class CSVMapper {
             @Mapping(constant = "0.1", target = "weight"),
             @Mapping(constant = "0", target = "stock"),
             @Mapping(constant = "NO", target = "stockUnlimited"),
-            @Mapping(constant = "0.0", target = "price"),
+            @Mapping(expression = "java(setCardPrice(card))", target = "price"),
             @Mapping(constant = "Idioma", target = "variantOneOptionName"),
             @Mapping(constant = "option", target = "variantOneOptionType"),
             @Mapping(constant = "Ingles", target = "variantOneOptionValue"),
@@ -43,7 +43,8 @@ public abstract class CSVMapper {
             @Mapping(source = "card.typeLine", target = "customFieldThreeValue"),
             @Mapping(constant = "selection", target = "customFieldThreeType"),
             @Mapping(constant = "Wizards", target = "brand"),
-            @Mapping(expression = "java(setCardImage(card))", target = "images")
+            @Mapping(expression = "java(setCardImage(card))", target = "images"),
+
     })
     public abstract CSVModel toCsvModel(Card card);
 
@@ -143,5 +144,13 @@ public abstract class CSVMapper {
 
         return sb.toString();
 
+    }
+
+    public String setCardPrice(Card card){
+        if(card.getPrices().get("custom-cardkingdom")!=null){
+            return card.getPrices().get("custom-cardkingdom");
+        } else {
+            return "0.0";
+        }
     }
 }

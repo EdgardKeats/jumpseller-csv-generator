@@ -2,11 +2,13 @@ package cl.rivendel.csv.ui;
 
 import cl.rivendel.csv.helper.CSVHelper;
 import cl.rivendel.csv.helper.CardImageHelper;
+import cl.rivendel.csv.helper.MTGJsonHelper;
 import cl.rivendel.csv.helper.ScryfallHelper;
 import cl.rivendel.csv.model.jumpseller.CSVModel;
 import cl.rivendel.csv.model.scryfall.Card;
 import cl.rivendel.csv.model.scryfall.Set;
 import cl.rivendel.csv.service.FTPClient;
+import cl.rivendel.csv.utils.DownloadUtils;
 import javafx.application.HostServices;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -27,16 +29,20 @@ public class SimpleUIController {
     private final CardImageHelper cardImageHelper;
     private final FTPClient ftpHelper;
     private final CSVHelper csvHelper;
+    private final DownloadUtils downloadUtils;
+    private final MTGJsonHelper mtgJsonHelper;
 
     private static final Logger log = LoggerFactory.getLogger(SimpleUIController.class);
 
 
-    SimpleUIController(HostServices hostServices, ScryfallHelper scryfallHelper, CardImageHelper cardImageHelper, FTPClient ftpHelper, CSVHelper csvHelper) {
+    SimpleUIController(HostServices hostServices, ScryfallHelper scryfallHelper, CardImageHelper cardImageHelper, FTPClient ftpHelper, CSVHelper csvHelper, DownloadUtils downloadUtils, MTGJsonHelper mtgJsonHelper) {
         this.hostServices = hostServices;
         this.scryfallHelper = scryfallHelper;
         this.cardImageHelper = cardImageHelper;
         this.ftpHelper = ftpHelper;
         this.csvHelper = csvHelper;
+        this.downloadUtils = downloadUtils;
+        this.mtgJsonHelper = mtgJsonHelper;
     }
 
     @FXML
@@ -57,6 +63,12 @@ public class SimpleUIController {
     @FXML
     public TextField txtImgBBKey;
 
+    @FXML
+    public TextField txtValorDolar;
+
+    @FXML
+    public CheckBox chkAddPrices;
+
     private Map<String, List<Set>> setMap;
 
     @FXML
@@ -67,11 +79,21 @@ public class SimpleUIController {
         this.btnGenerateCSV.setOnAction(this::startGeneration);
         this.btnClearForm.setOnAction(this::clearForm);
         this.btnUpdateDB.setOnAction(this::updateDB);
+        this.chkAddPrices.setOnAction(this::activateTxtValorDolar);
+        this.txtValorDolar.setDisable(true);
+    }
+
+    private void activateTxtValorDolar(ActionEvent actionEvent) {
+        this.txtValorDolar.setDisable(!this.chkAddPrices.isSelected());
+
     }
 
     private void startGeneration(ActionEvent actionEvent) {
         if (this.txtImgBBKey.getText().isEmpty()){
             log.error("No se ha ingresado una API Key para iniciar la ejecución, no se subirán imágenes");
+        }
+        if(checkIfTxtDolarIsValid()){
+            printToLogView("No se agrego valor dolar del día, o no es correcto");
         }
         Thread newThread = new Thread(() -> {
             try {
@@ -85,6 +107,20 @@ public class SimpleUIController {
             }
         });
         newThread.start();
+    }
+
+    private boolean checkIfTxtDolarIsValid() {
+        if (this.chkAddPrices.isSelected()
+                && this.txtValorDolar.getText().isEmpty()){
+            try {
+                Integer.parseInt(this.txtValorDolar.getText());
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return false;
+
+
     }
 
     private void enableControls() {
@@ -125,7 +161,7 @@ public class SimpleUIController {
     private void downloadCSV(){
         try{
             printToLogView("Updating base file");
-            scryfallHelper.saveJSONFile(scryfallHelper.getAllCardsURL());
+            downloadUtils.saveJSONFile(scryfallHelper.getAllCardsURL());
             printToLogView("File downloaded successfully");
         } catch (Exception ex){
             printToLogView("Something happened while downloading the new file");
@@ -143,7 +179,7 @@ public class SimpleUIController {
             printToLogView("Starting... please wait a few minutes");
             String setName = this.cboSet.getValue();
             String set = this.setMap.get(cboSetType.getValue()).stream().filter(m -> m.getName().equalsIgnoreCase(setName)).findFirst().get().getCode();
-            List<Card> cardsList = scryfallHelper.getSetCards(scryfallHelper.getAllCardsURL(), set);
+            List<Card> cardsList = scryfallHelper.getCardsFromJsonURL(scryfallHelper.getAllCardsURL(), set);
             if (!cardsList.isEmpty()) {
                 Map<String, String> cardNames;
                 if(this.chkUploadImages.isSelected()){
@@ -156,6 +192,13 @@ public class SimpleUIController {
                     ftpHelper.uploadImages(cardNames, this.txtImgBBKey.getText());
                     printToLogView("updating csv file with card images urls");
                     csvHelper.updateImagesUris(cardsList, cardNames);
+                }
+                if(chkAddPrices.isSelected()){
+                    List<cl.rivendel.csv.model.mtgjson.Card> cards = mtgJsonHelper.getCardsFromSetJSON(set);
+                    mtgJsonHelper.replaceUUID(cardsList, cards);
+                    Map<String, Float> cardPrices = mtgJsonHelper.getCardPrices();
+                    mtgJsonHelper.mergePrices(cardsList, cardPrices, Integer.parseInt(this.txtValorDolar.getText()));
+                    printToLogView("Cantidad de cartas con precio recuperadas: "+cards.size());
                 }
                 printToLogView("creating csv models");
                 List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
@@ -193,8 +236,6 @@ public class SimpleUIController {
     }
 
     private void showMessage(String title, String header, String message){
-
-
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(header);

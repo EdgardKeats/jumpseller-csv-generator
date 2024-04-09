@@ -18,7 +18,7 @@ import java.util.UUID;
 @ToString
 public class Card {
     private String object;
-    private UUID id;
+    private String id;
     @JsonProperty("oracle_id")
     private String oracleId;
     @JsonProperty("multiverse_ids")

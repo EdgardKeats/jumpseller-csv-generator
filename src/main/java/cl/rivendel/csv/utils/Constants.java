@@ -19,4 +19,7 @@ public class Constants {
 
     public static final String ENGLISH = "en";
     public static final String SPANISH = "es";
+
+    public static final String JSON_FILE_NAME = "Cards.json";
+
 }

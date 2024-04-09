@@ -1,0 +1,101 @@
+package cl.rivendel.csv.model.mtgjson;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+import java.util.List;
+import java.util.Map;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@ToString
+public class Card {
+    private String artist;
+    private List<String> artistIds;
+    private String asciiName;
+    private List<Float> attractionLights;
+    private String[] availability;
+    private String[] boosterTypes;
+    private String borderColor;
+    private List<String> cardParts;
+    private String[] colorIdentity;
+    private List<String> colorIndicator;
+    private String[] colors;
+    private float convertedManaCost;
+    private String defense;
+    private String duelDeck;
+    private Long edhrecRank;
+    private Long edhrecSaltiness;
+    private Float faceConvertedManaCost;
+    private String faceFlavorName;
+    private Float faceManaValue;
+    private String faceName;
+    private String[] finishes;
+    private String flavorName;
+    private String flavorText;
+    private ForeignData[] foreignData;
+    private List<String> frameEffects;
+    private String frameVersion;
+    private String hand;
+    private Boolean hasAlternativeDeckLimit;
+    private Boolean hasContentWarning;
+    private boolean hasFoil;
+    private boolean hasNonFoil;
+    private Map<String, String> identifiers;
+    private Boolean isAlternative;
+    private Boolean isFoilOnline;
+    private Boolean isFullArt;
+    private Boolean isFunny;
+    private Boolean isOnlineOnly;
+    private Boolean isOversized;
+    private Boolean isPromo;
+    private Boolean isRebalanced;
+    private Boolean isReprint;
+    private Boolean isReserved;
+    private Boolean isStarter;
+    private Boolean isStorySpotlight;
+    private Boolean isTextless;
+    private Boolean isTimeshifted;
+    private List<String> keywords;
+    private String language;
+    private String layout;
+    private LeadershipSkills leadershipSkills;
+    private Map<String, String> legalities;
+    private String life;
+    private String loyalty;
+    private String manaCost;
+    private float manaValue;
+    private String name;
+    private String number;
+    private List<String> originalPrintings;
+    private String originalReleaseDate;
+    private String originalText;
+    private String originalType;
+    private List<String> otherFaceIds;
+    private String power;
+    private List<String> printings;
+    private List<String> promoTypes;
+    private Map<String, String> purchaseUrls;
+    private String rarity;
+    private RelatedCards relatedCards;
+    private List<String> rebalancedPrintings;
+    private List<Ruling> rulings;
+    private String securityStamp;
+    private String setCode;
+    private String side;
+    private String signature;
+    private List<String> sourceProducts;
+    private List<String> subsets;
+    private String[] subtypes;
+    private String[] supertypes;
+    private String text;
+    private String toughness;
+    private String type;
+    private String[] types;
+    private String uuid;
+    private List<String> variations;
+    private String watermark;
+}
