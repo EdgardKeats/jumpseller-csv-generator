@@ -5,7 +5,6 @@ import cl.rivendel.csv.model.scryfall.Card;
 import cl.rivendel.csv.model.scryfall.Set;
 import cl.rivendel.csv.service.ScryfallClient;
 import cl.rivendel.csv.utils.Constants;
-import cl.rivendel.csv.utils.DownloadUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -29,20 +28,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
 @Component
 public class ScryfallHelper {
 
     private static final Logger log = LoggerFactory.getLogger(ScryfallHelper.class);
+    private static final String JSON_FILE_NAME = "Cards.json";
 
     private final ScryfallClient scryfallClient;
-    private final DownloadUtils downloadUtils;
     private final boolean skipHighRes;
 
-
-    public ScryfallHelper(@Autowired ScryfallClient scryfallClient, @Autowired DownloadUtils downloadUtils,
-                          @Value("${csvGenProperty.skipHighResImage:true}") boolean skipHighRes){
+    public ScryfallHelper(@Autowired ScryfallClient scryfallClient, @Value("${csvGenProperty.skipHighResImage:true}") boolean skipHighRes){
         this.scryfallClient = scryfallClient;
-        this.downloadUtils = downloadUtils;
         this.skipHighRes = skipHighRes;
     }
 
@@ -54,10 +51,19 @@ public class ScryfallHelper {
         log.info("Attempting to get ALL cards");
         return getCardsURL(Constants.ALL_CARDS);
     }
+    public List<Card> getSetCards(String jsonUrl, String set) {
+    log.info("attempting to download cards file from {}, for the set {}", jsonUrl, set);
+        try {
+            return getCardsFromJsonURL(jsonUrl, set);
+        } catch (IOException ex) {
+            log.error(ex.getMessage());
+            return new ArrayList<>();
+        }
+    }
 
     public List<Card> getCardsFromJsonURL(String jsonUrl, String set) throws IOException {
-        log.info("attempting to download cards file from {}, for the set {}", jsonUrl, set);
-        String jsonFileName = downloadUtils.saveJSONFile(jsonUrl);
+        log.info("Attempting to download cards json file");
+        String jsonFileName = saveJSONFile(jsonUrl);
         ObjectMapper objectMapper = new ObjectMapper();
         List<Card> cards = new ArrayList<>();
         File jsonFile = new File(jsonFileName);
@@ -65,7 +71,7 @@ public class ScryfallHelper {
             while (it.hasNext()) {
                 try{
                     String line = it.nextLine();
-                    Card card = objectMapper.readValue(line, new TypeReference<>() {});
+                    Card card = objectMapper.readValue(line, new TypeReference<Card>() {});
                     if(card.getSet().trim().equalsIgnoreCase(set) && (card.getLang().equalsIgnoreCase(Constants.ENGLISH))) cards.add(card);
                 } catch (Exception e){
                     log.error("Error during file line to card object parsing");
@@ -79,26 +85,58 @@ public class ScryfallHelper {
         return cards;
     }
 
+    public String saveJSONFile(String jsonUrl) throws IOException {
+        File file = new File(JSON_FILE_NAME);
+        if(!file.exists()){
+            log.info("Creating new json file with name {}", JSON_FILE_NAME);
+            ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(jsonUrl).openStream());
+            try(FileOutputStream fileOutputStream = new FileOutputStream(JSON_FILE_NAME)){
+                fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+            }
+            log.info("File downloaded");
+        } else {
+            log.info("File {} already exists! ", JSON_FILE_NAME);
+        }
+        return JSON_FILE_NAME;
+    }
+
+    private void deleteBaseJsonFile() {
+        log.info("Attempting to erase existing base file");
+        File file = new File(JSON_FILE_NAME);
+        if (file.delete())
+            log.info("Base file deleted!");
+        else
+            log.info("The base file has not been deleted");
+    }
+
     public Map<String, String> getOracleCardsImages(List<Card> cardList) throws Exception {
         Map<String, String> downloadedCardsNames = new HashMap<>();
         new File(Constants.ORACLE_CARDS_FOLDER).mkdir();
-            for (Card card : cardList) {
-                if (card.getImageUris() != null) {
-                    try {
-                        ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(card.getImageUris().get(Constants.PNG)).openStream());
-                        String fileName = createCardName(card);
-                        try(FileOutputStream fileOutputStream = new FileOutputStream(fileName)){
-                            fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-                        }
-                        downloadedCardsNames.put(card.getCollectorNumber(), fileName);
-                    } catch (IOException ioException) {
-                        log.error("IoException while downloading card image", ioException);
+        cardList.forEach(
+                card -> {
+                    if (card.getImageUris() != null) {
+                        downloadImage(downloadedCardsNames, card, card.getImageUris().get(Constants.PNG));
+                    } else {
+                        log.info("The card {} might be a double-faced card, downloading only one face", card.getName());
+                        downloadImage(downloadedCardsNames, card, card.getCardFaces().get(0).getImageUris().get(Constants.PNG));
                     }
-                } else {
-                    log.info("The card {} might be double-faced card, downloading only one face, skipping");
                 }
-            }
+        );
         return downloadedCardsNames;
+    }
+
+    private void downloadImage(Map<String, String> downloadedCardsNames, Card card, String imageURL){
+        try {
+            log.info("Image URL = {}", imageURL);
+            ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(imageURL).openStream());
+            String fileName = createCardName(card);
+            try(FileOutputStream fileOutputStream = new FileOutputStream(fileName)){
+                fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+            }
+            downloadedCardsNames.put(card.getCollectorNumber(), fileName);
+        } catch (IOException ioException) {
+            log.error("IoException while downloading card image", ioException);
+        }
     }
 
     /**

@@ -18,11 +18,7 @@ import org.springframework.stereotype.Component;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -72,10 +68,14 @@ public class CSVHelper {
     }
 
     public void updateImagesUris(List<Card> cardsList, Map<String, String> newValues) {
-        for (Card card: cardsList) {
+        cardsList.forEach(card -> {
             log.info("Setting card image url: {}", newValues.get(card.getCollectorNumber()));
-            if(newValues.get(card.getCollectorNumber())!= null)
+            if(newValues.get(card.getCollectorNumber())!= null) {
+                if (card.getImageUris() == null) {
+                    card.setImageUris(new HashMap<>());
+                }
                 card.getImageUris().put("imgBB", newValues.get(card.getCollectorNumber()));
-        }
+            }
+        });
     }
 }
