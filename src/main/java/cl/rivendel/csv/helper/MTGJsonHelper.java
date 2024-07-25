@@ -77,8 +77,12 @@ public class MTGJsonHelper {
 
     public void mergePrices(List<cl.rivendel.csv.model.scryfall.Card> cardsList, Map<String, Float> cardPrices, int valorDolar) {
         cardsList.forEach(card -> {
-            float valorTotal = Math.round(cardPrices.get(card.getId())*valorDolar/10.0) * 10 ;
-            card.getPrices().put("custom-cardkingdom", Float.toString(valorTotal));
+            if(cardPrices.get(card.getId()) != null){
+                float valorTotal = Math.round(cardPrices.get(card.getId())*valorDolar/10.0) * 10 ;
+                card.getPrices().put("custom-cardkingdom", Float.toString(valorTotal));
+            } else {
+                card.getPrices().put("custom-cardkingdom", "0.0");
+            }
         });
     }
 }

@@ -65,4 +65,5 @@ public class CardToken {
     private String uuid;
     private String watermark;
     private Long edhrecSaltiness;
+    private String manaCost;
 }
