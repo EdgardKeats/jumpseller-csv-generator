@@ -15,11 +15,8 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,19 +28,15 @@ import java.util.Map;
 
 @Component
 public class ImgBBFtpHelper implements FTPClient {
+    private static final int RETRIES_ALLOWED = 5;
 
     private static final Logger log = LoggerFactory.getLogger(ImgBBFtpHelper.class);
 
     public void uploadImages(Map<String, String> setImages, String imgBBApiKey) {
         log.trace("apikey: {}", imgBBApiKey);
-        setImages.entrySet().forEach(
-                entry -> {
-                    try {
-                        entry.setValue(uploadImage(getBase64Image(entry.getValue()), entry.getKey(), imgBBApiKey));
-                    } catch (IOException e) {
-                        log.error("IOException while uploading image...");
-                    }
-                });
+        for (Map.Entry<String, String> entry : setImages.entrySet()) {
+            entry.setValue(uploadImage(getBase64Image(entry.getValue()), entry.getKey(), imgBBApiKey));
+        }
     }
 
     private String getBase64Image(String imgPath) {
@@ -55,12 +48,19 @@ public class ImgBBFtpHelper implements FTPClient {
         }
     }
 
-    private String uploadImage(String base64Image, String imgName, String imgBBApiKey) throws IOException {
-        log.trace("uploading base64Image={}, imgName={}", base64Image, imgName);
+    private String uploadImage(String base64Image, String imgName, String imgBBApiKey) {
+        return uploadImage(base64Image, imgName, imgBBApiKey, 0);
+    }
+
+    private String uploadImage(String base64Image, String imgName, String imgBBApiKey, int retries) {
         String returnValue = "";
-        CloseableHttpClient httpclient = null;
-        try {
-            httpclient = HttpClients.createDefault();
+        if (retries > RETRIES_ALLOWED){
+            log.error("Retries allowed surpassed, returning empty url for imgName {}", imgName);
+            return returnValue;
+        }
+        log.trace("uploading base64Image={}, imgName={}", base64Image, imgName);
+
+        try (CloseableHttpClient httpclient= HttpClients.createMinimal()) {
             HttpPost httpPost = new HttpPost("https://api.imgbb.com/1/upload?key="+imgBBApiKey);
             List<NameValuePair> postParameters = new ArrayList<>();
             postParameters.add(new BasicNameValuePair("image", base64Image));
@@ -84,26 +84,14 @@ public class ImgBBFtpHelper implements FTPClient {
             } else {
                 //TODO: Keep file name so it can be uploaded later or implement a retry mechanism
                 log.error("Non 200 response from ftp service: {} {}", response2.getCode(), response2.getReasonPhrase());
-                addToFailedUploadReport(imgName);
+                retries++;
+                uploadImage(base64Image, imgName, imgBBApiKey, retries);
             }
 
         } catch (IOException | ParseException e) {
             log.error(e.getMessage());
-        } finally {
-            if(httpclient!=null){
-                httpclient.close();
-                log.trace("http client succesfully closed");
-            }
         }
         return returnValue;
-    }
-
-    private void addToFailedUploadReport(String imgName) {
-        try (FileWriter fileWriter = new FileWriter("FailedUpload.txt");) {
-            fileWriter.append(imgName).append("\n");
-        } catch (IOException e) {
-            log.error("The report file could not be written for image {}", imgName);
-        }
     }
 
 }

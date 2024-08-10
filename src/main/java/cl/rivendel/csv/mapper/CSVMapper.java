@@ -7,6 +7,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Mapper(componentModel = "spring")
 public abstract class CSVMapper {
 
@@ -22,7 +25,7 @@ public abstract class CSVMapper {
             @Mapping(expression = "java(generateCategory(card))", target = "categories"),
             @Mapping(constant = "NO", target = "digital"),
             @Mapping(constant = "NO", target = "featured"),
-            @Mapping(constant = "available", target = "status"),
+            @Mapping(constant = "disabled", target = "status"),
             @Mapping(constant = "0.1", target = "weight"),
             @Mapping(constant = "0", target = "stock"),
             @Mapping(constant = "NO", target = "stockUnlimited"),
@@ -47,6 +50,29 @@ public abstract class CSVMapper {
 
     })
     public abstract CSVModel toCsvModel(Card card);
+
+    @Mappings({
+            @Mapping(target = "setName", source = "customFieldTwoValue"),
+            @Mapping(target = "rarity", source = "customFieldFourValue"),
+            @Mapping(target = "typeLine", source = "customFieldThreeValue"),
+            @Mapping(target = "collectorNumber", expression="java(getCollectorNumber(csvModel))"),
+            @Mapping(target = "imageUris", expression = "java(setImageBBImageUri(csvModel))"),
+    })
+    public abstract Card toCard(CSVModel csvModel);
+
+    public String getCollectorNumber(CSVModel csvModel){
+        return csvModel.getName().substring(csvModel.getName().lastIndexOf("#"));
+    }
+
+    public String getName(CSVModel csvModel){
+        return csvModel.getName().substring(0, csvModel.getName().lastIndexOf("#")).trim();
+    }
+
+    public Map<String, String> setImageBBImageUri(CSVModel csvModel) {
+        Map<String, String> imageUriMap = new HashMap<>();
+        imageUriMap.put("imgBB", csvModel.getImages());
+        return imageUriMap;
+    }
 
     public String setCardImage(Card card) {
         if (card.getImageUris() != null && card.getImageUris().get("imgBB") != null)

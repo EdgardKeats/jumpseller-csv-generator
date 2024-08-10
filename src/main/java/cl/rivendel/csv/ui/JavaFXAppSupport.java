@@ -20,7 +20,7 @@ public class JavaFXAppSupport extends Application {
     private ConfigurableApplicationContext context;
 
     @Override
-    public void init() throws Exception {
+    public void init() {
         ApplicationContextInitializer<GenericApplicationContext> initializer = applicationContext -> {
             applicationContext.registerBean(Application.class, ()->JavaFXAppSupport.this);
             applicationContext.registerBean(Parameters.class, this::getParameters);
@@ -39,7 +39,7 @@ public class JavaFXAppSupport extends Application {
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         this.context.publishEvent(new StageReadyEvent(stage));
     }
 

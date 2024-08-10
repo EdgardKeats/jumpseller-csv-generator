@@ -3,10 +3,7 @@ package cl.rivendel.csv.helper;
 import cl.rivendel.csv.mapper.CSVMapper;
 import cl.rivendel.csv.model.jumpseller.CSVModel;
 import cl.rivendel.csv.model.scryfall.Card;
-import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.CsvBindByPosition;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.bean.*;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -77,5 +72,10 @@ public class CSVHelper {
                 card.getImageUris().put("imgBB", newValues.get(card.getCollectorNumber()));
             }
         });
+    }
+
+    public List<CSVModel> csvModelToCardList(String filePath) throws FileNotFoundException {
+        return new CsvToBeanBuilder(new FileReader(filePath))
+                .withType(CSVModel.class).build().parse();
     }
 }

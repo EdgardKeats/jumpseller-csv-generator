@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -174,6 +175,21 @@ public class SimpleUIController {
         this.cboSetType.getSelectionModel().clearSelection();
     }
 
+    private void fillCsvWithPrices(){
+        try{
+            printToLogView("Starting filling process... please wait a few minutes");
+            String filePath = "";
+            List<CSVModel> cardList = csvHelper.csvModelToCardList(filePath);
+
+        } catch (FileNotFoundException e) {
+            showMessage("RIP", "Something happened", "The file could not be found");
+
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
     private void generateCSV() {
         try {
             printToLogView("Starting... please wait a few minutes");
@@ -209,6 +225,7 @@ public class SimpleUIController {
             printToLogView("CSV File generation finished! :D");
 
         } catch (Exception e){
+            showMessage("RIP", "Something happened", "Something exploded while trying to generate the file");
             throw new RuntimeException(e);
         }
     }
