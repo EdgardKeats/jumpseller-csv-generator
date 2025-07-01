@@ -34,13 +34,10 @@ public class ScryfallHelper {
 
     private static final Logger log = LoggerFactory.getLogger(ScryfallHelper.class);
     private static final String JSON_FILE_NAME = "Cards.json";
-
     private final ScryfallClient scryfallClient;
-    private final boolean skipHighRes;
 
-    public ScryfallHelper(@Autowired ScryfallClient scryfallClient, @Value("${csvGenProperty.skipHighResImage:true}") boolean skipHighRes){
+    public ScryfallHelper(@Autowired ScryfallClient scryfallClient){
         this.scryfallClient = scryfallClient;
-        this.skipHighRes = skipHighRes;
     }
 
     private String getCardsURL(String bulkDataType){
@@ -127,7 +124,7 @@ public class ScryfallHelper {
 
     private void downloadImage(Map<String, String> downloadedCardsNames, Card card, String imageURL){
         try {
-            log.info("Image URL = {}", imageURL);
+            log.trace("Image URL = {}", imageURL);
             ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(imageURL).openStream());
             String fileName = createCardName(card);
             try(FileOutputStream fileOutputStream = new FileOutputStream(fileName)){
@@ -147,7 +144,7 @@ public class ScryfallHelper {
      */
     private String createCardName(Card card) {
         return Constants.ORACLE_CARDS_FOLDER +
-                card.getName().replace(Constants.FORWARD_SLASH, Constants.HYPHEN) +
+                card.getName().replace(Constants.FORWARD_SLASH, Constants.HYPHEN).replace(Constants.COLON, Constants.HYPHEN) +
                 Constants.HYPHEN +
                 card.getSet() +
                 Constants.HYPHEN  +

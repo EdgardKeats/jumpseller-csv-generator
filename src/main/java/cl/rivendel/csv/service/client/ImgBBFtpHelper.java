@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -40,12 +39,16 @@ public class ImgBBFtpHelper implements FTPClient {
     }
 
     private String getBase64Image(String imgPath) {
+        log.trace("Getting base64 image for path = {}", imgPath);
+        String base64 = "";
         try {
-            return Base64.getEncoder().encodeToString(Files.readAllBytes(
+            base64 = Base64.getEncoder().encodeToString(Files.readAllBytes(
                     Paths.get(imgPath)));
         } catch (IOException ex){
-            return "";
+            log.error("IOException while getting image", ex);
+
         }
+        return base64;
     }
 
     private String uploadImage(String base64Image, String imgName, String imgBBApiKey) {
@@ -61,7 +64,7 @@ public class ImgBBFtpHelper implements FTPClient {
         log.trace("uploading base64Image={}, imgName={}", base64Image, imgName);
 
         try (CloseableHttpClient httpclient= HttpClients.createMinimal()) {
-            HttpPost httpPost = new HttpPost("https://api.imgbb.com/1/upload?key="+imgBBApiKey);
+            HttpPost httpPost = new HttpPost("https://api.imgbb.com/1/upload?expiration=2592000&key="+imgBBApiKey);
             List<NameValuePair> postParameters = new ArrayList<>();
             postParameters.add(new BasicNameValuePair("image", base64Image));
             postParameters.add(new BasicNameValuePair("name", imgName));

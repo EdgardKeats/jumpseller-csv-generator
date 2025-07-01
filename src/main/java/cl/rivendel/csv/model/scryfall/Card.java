@@ -155,5 +155,8 @@ public class Card {
     private String variationOf;
     @JsonProperty("purchase_uris")
     private Map<String, String> purchaseUris;
+    private String defense;
+    @JsonProperty("game_changer")
+    private String gameChanger;
 
 }

@@ -64,7 +64,7 @@ public class CSVHelper {
 
     public void updateImagesUris(List<Card> cardsList, Map<String, String> newValues) {
         cardsList.forEach(card -> {
-            log.info("Setting card image url: {}", newValues.get(card.getCollectorNumber()));
+            log.trace("Setting card image url: {}", newValues.get(card.getCollectorNumber()));
             if(newValues.get(card.getCollectorNumber())!= null) {
                 if (card.getImageUris() == null) {
                     card.setImageUris(new HashMap<>());
@@ -76,6 +76,8 @@ public class CSVHelper {
 
     public List<CSVModel> csvModelToCardList(String filePath) throws FileNotFoundException {
         return new CsvToBeanBuilder(new FileReader(filePath))
-                .withType(CSVModel.class).build().parse();
+                .withType(CSVModel.class)
+                .build()
+                .parse();
     }
 }

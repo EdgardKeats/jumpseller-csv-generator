@@ -12,6 +12,7 @@ public class Constants {
     public static final String PNG_EXTENSION = ".png";
     public static final String HYPHEN = "-";
     public static final String FORWARD_SLASH = "/";
+    public  static final String COLON = ":";
 
     public static final String P_OPENING = "<p>";
     public static final String P_CLOSING = "</p>";
