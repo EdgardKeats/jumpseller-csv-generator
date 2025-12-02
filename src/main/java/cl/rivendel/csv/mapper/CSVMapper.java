@@ -132,7 +132,8 @@ public abstract class CSVMapper {
                 .append("\n")
 
                 .append(Constants.P_OPENING)
-                .append(card.getTypeLine())
+                //Tarkir workaround
+                .append(card.getTypeLine() != null ? card.getTypeLine() : "")
                 .append(Constants.P_CLOSING)
                 .append("\n")
 
@@ -140,20 +141,23 @@ public abstract class CSVMapper {
                 .append(card.getOracleText() != null ? card.getOracleText().replace("\n", "</br>").replace("\r", "") : "")
                 .append(Constants.P_CLOSING)
                 .append("\n");
-        if (card.getTypeLine().toUpperCase().contains(Constants.CREATURE.toUpperCase())) {
-            sb.append(Constants.P_OPENING)
-                    .append(card.getPower())
-                    .append("/")
-                    .append(card.getToughness())
-                    .append(Constants.P_CLOSING)
-                    .append("\n");
-        }
+        //Tarkir nulls workaround
+        if(card.getTypeLine() != null) {
+            if (card.getTypeLine().toUpperCase().contains(Constants.CREATURE.toUpperCase())) {
+                sb.append(Constants.P_OPENING)
+                        .append(card.getPower())
+                        .append("/")
+                        .append(card.getToughness())
+                        .append(Constants.P_CLOSING)
+                        .append("\n");
+            }
 
-        if (card.getTypeLine().toUpperCase().contains("PLANESWALKER")) {
-            sb.append(Constants.P_OPENING)
-                    .append("Loyalty: ")
-                    .append(card.getLoyalty())
-                    .append(Constants.P_CLOSING).append("\n");
+            if (card.getTypeLine().toUpperCase().contains("PLANESWALKER")) {
+                sb.append(Constants.P_OPENING)
+                        .append("Loyalty: ")
+                        .append(card.getLoyalty())
+                        .append(Constants.P_CLOSING).append("\n");
+            }
         }
 
         sb.append(Constants.P_OPENING)
