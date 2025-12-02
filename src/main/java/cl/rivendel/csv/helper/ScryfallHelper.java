@@ -6,6 +6,7 @@ import cl.rivendel.csv.model.scryfall.Set;
 import cl.rivendel.csv.service.ScryfallClient;
 import cl.rivendel.csv.utils.Constants;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.io.FileUtils;
@@ -65,6 +66,7 @@ public class ScryfallHelper {
         log.info("Attempting to download cards json file");
         String jsonFileName = saveJSONFile(jsonUrl);
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
         List<Card> cards = new ArrayList<>();
         File jsonFile = new File(jsonFileName);
         try (LineIterator it = FileUtils.lineIterator(jsonFile, "UTF-8")){

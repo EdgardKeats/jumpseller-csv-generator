@@ -43,7 +43,7 @@ public class JavaFXAppSupport extends Application {
         this.context.publishEvent(new StageReadyEvent(stage));
     }
 
-    class StageReadyEvent extends ApplicationEvent{
+    public class StageReadyEvent extends ApplicationEvent{
         public Stage getStage(){
             return Stage.class.cast(getSource());
         }

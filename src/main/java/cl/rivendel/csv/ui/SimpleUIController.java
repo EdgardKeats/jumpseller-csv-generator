@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -91,23 +92,23 @@ public class SimpleUIController {
 
     private void startGeneration(ActionEvent actionEvent) {
         if (this.txtImgBBKey.getText().isEmpty()){
-            log.error("No se ha ingresado una API Key para iniciar la ejecución, no se subirán imágenes");
+            printToLogView("No se ha ingresado una API Key para iniciar la ejecución, no se subirán imágenes");
         }
         if(checkIfTxtDolarIsValid()){
             printToLogView("No se agrego valor dolar del día, o no es correcto");
         }
-        Thread newThread = new Thread(() -> {
+        //Thread newThread = new Thread(() -> {
             try {
                 disableControls();
                 generateCSV();
             } catch (Exception e){
-                   log.error("Error generating CSV...");
+                   printToLogView("Error generating CSV...");
                    log.error(e.getMessage());
             } finally {
                 enableControls();
             }
-        });
-        newThread.start();
+        //});
+        //newThread.start();
     }
 
     private boolean checkIfTxtDolarIsValid() {
@@ -149,8 +150,8 @@ public class SimpleUIController {
                 disableControls();
                 downloadCSV();
             } catch (Exception e){
-                log.error("Error generating CSV...");
-                log.error(e.getMessage());
+                printToLogView("Error generating CSV...");
+                printToLogView(e.getMessage());
             } finally {
                 enableControls();
             }
@@ -219,7 +220,7 @@ public class SimpleUIController {
                 printToLogView("creating csv models");
                 List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
                 printToLogView("creating jumpseller csv file");
-                csvHelper.generateJumpSellerCSV(listCSVModel, ".\\" + cardsList.get(0).getSet() + "-list.csv");
+                csvHelper.generateJumpSellerCSV(listCSVModel, "." + File.separator + cardsList.get(0).getSet() + "-list.csv");
                 printToLogView("File name: "+cardsList.get(0).getSet() + "-list.csv");
             }
             printToLogView("CSV File generation finished! :D");
@@ -247,9 +248,9 @@ public class SimpleUIController {
     }
 
     private void printToLogView(String logString){
-
         log.info(logString);
-        this.txtLog.appendText(logString+"\n");
+
+        //this.txtLog.appendText(logString+"\n");
     }
 
     private void showMessage(String title, String header, String message){

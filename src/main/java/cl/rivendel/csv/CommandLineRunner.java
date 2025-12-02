@@ -17,6 +17,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -91,7 +92,7 @@ public class CommandLineRunner {// implements org.springframework.boot.CommandLi
                 System.out.println("creating csv models");
                 List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
                 System.out.println("creating jumpseller csv file");
-                csvHelper.generateJumpSellerCSV(listCSVModel, ".\\" + cardsList.get(0).getSet() + "-list.csv");
+                csvHelper.generateJumpSellerCSV(listCSVModel, "." + File.separator + cardsList.get(0).getSet() + "-list.csv");
             }
             System.out.println("CSV File generation finished! :D");
         } catch (Exception e) {
