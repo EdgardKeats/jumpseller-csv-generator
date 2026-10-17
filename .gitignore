@@ -16,3 +16,4 @@ resources/application.properties
 #ignore json files generated
 *.json
 *-list.csv
+*.gz
