@@ -1,10 +1,6 @@
 package cl.rivendel.csv.ui;
 
 import cl.rivendel.csv.BootApplication;
-import cl.rivendel.csv.service.ScryfallClient;
-import feign.Feign;
-import feign.jackson.JacksonDecoder;
-import feign.jackson.JacksonEncoder;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;

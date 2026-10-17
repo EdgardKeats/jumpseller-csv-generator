@@ -1,17 +1,12 @@
 package cl.rivendel.csv.ui;
 
-import cl.rivendel.csv.helper.CSVHelper;
-import cl.rivendel.csv.helper.CardImageHelper;
-import cl.rivendel.csv.helper.MTGJsonHelper;
-import cl.rivendel.csv.helper.ScryfallHelper;
-import cl.rivendel.csv.model.jumpseller.CSVModel;
-import cl.rivendel.csv.model.scryfall.Card;
+import cl.rivendel.csv.helper.*;
+import cl.rivendel.csv.model.LogicDTO;
 import cl.rivendel.csv.model.scryfall.Set;
-import cl.rivendel.csv.service.FTPClient;
-import cl.rivendel.csv.utils.DownloadUtils;
 import javafx.application.HostServices;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -19,8 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,23 +21,15 @@ import java.util.stream.Collectors;
 public class SimpleUIController {
     private final HostServices hostServices;
     private final ScryfallHelper scryfallHelper;
-    private final CardImageHelper cardImageHelper;
-    private final FTPClient ftpHelper;
-    private final CSVHelper csvHelper;
-    private final DownloadUtils downloadUtils;
-    private final MTGJsonHelper mtgJsonHelper;
+    private final LogicHelper logicHelper;
 
     private static final Logger log = LoggerFactory.getLogger(SimpleUIController.class);
 
 
-    SimpleUIController(HostServices hostServices, ScryfallHelper scryfallHelper, CardImageHelper cardImageHelper, FTPClient ftpHelper, CSVHelper csvHelper, DownloadUtils downloadUtils, MTGJsonHelper mtgJsonHelper) {
+    SimpleUIController(HostServices hostServices, ScryfallHelper scryfallHelper, LogicHelper logicHelper) {
         this.hostServices = hostServices;
         this.scryfallHelper = scryfallHelper;
-        this.cardImageHelper = cardImageHelper;
-        this.ftpHelper = ftpHelper;
-        this.csvHelper = csvHelper;
-        this.downloadUtils = downloadUtils;
-        this.mtgJsonHelper = mtgJsonHelper;
+        this.logicHelper = logicHelper;
     }
 
     @FXML
@@ -90,26 +75,48 @@ public class SimpleUIController {
 
     }
 
-    private void startGeneration(ActionEvent actionEvent) {
-        if (this.txtImgBBKey.getText().isEmpty()){
-            printToLogView("No se ha ingresado una API Key para iniciar la ejecución, no se subirán imágenes");
-        }
-        if(checkIfTxtDolarIsValid()){
-            printToLogView("No se agrego valor dolar del día, o no es correcto");
-        }
-        //Thread newThread = new Thread(() -> {
-            try {
-                disableControls();
-                generateCSV();
-            } catch (Exception e){
-                   printToLogView("Error generating CSV...");
-                   log.error(e.getMessage());
-            } finally {
-                enableControls();
-            }
-        //});
-        //newThread.start();
-    }
+     private void startGeneration(ActionEvent actionEvent) {
+              if (this.txtImgBBKey.getText().isEmpty()){
+                  log.info("No se ha ingresado una API Key para iniciar la ejecución, no se subirán imágenes");
+              }
+              if(checkIfTxtDolarIsValid()){
+                  log.info("No se agrego valor dolar del día, o no es correcto");
+              }
+
+              disableControls();
+              //prepare DTO
+              LogicDTO dto = LogicDTO
+                      .builder()
+                      .addPrices(this.chkAddPrices.isSelected())
+                      .setValue(this.cboSet.getValue())
+                      .setType(this.setMap.get(cboSetType.getValue()).stream().filter(m -> m.getName().equalsIgnoreCase(this.cboSet.getValue()))
+                              .findFirst().get().getCode())
+                      .imbBBKey(this.txtImgBBKey.getText())
+                      .uploadImages(this.chkUploadImages.isSelected())
+                      .dolarValue(this.txtValorDolar.getText())
+                      .build();
+
+
+              Task<String> backgroundTask = new Task<String>() {
+                  @Override
+                  protected String call() throws Exception {
+                      logicHelper.generateCSV(dto);
+                      return "";
+                  }
+              };
+
+              backgroundTask.setOnSucceeded( event -> {
+                  enableControls();
+
+             }); //do nothing special
+              backgroundTask.setOnFailed( event-> {
+                  showMessage("RIP", "Something happened", "Something exploded while trying to generate the file");
+                  enableControls();
+              });
+
+              new Thread(backgroundTask).start();
+          }
+
 
     private boolean checkIfTxtDolarIsValid() {
         if (this.chkAddPrices.isSelected()
@@ -148,10 +155,10 @@ public class SimpleUIController {
         Thread newThread = new Thread(() -> {
             try {
                 disableControls();
-                downloadCSV();
+                logicHelper.downloadCSV();
             } catch (Exception e){
-                printToLogView("Error generating CSV...");
-                printToLogView(e.getMessage());
+                log.error("Error generating CSV...");
+                log.error(e.getMessage());
             } finally {
                 enableControls();
             }
@@ -160,75 +167,9 @@ public class SimpleUIController {
 
     }
 
-    private void downloadCSV(){
-        try{
-            printToLogView("Updating base file");
-            downloadUtils.saveJSONFile(scryfallHelper.getAllCardsURL());
-            printToLogView("File downloaded successfully");
-        } catch (Exception ex){
-            printToLogView("Something happened while downloading the new file");
-            printToLogView(ex.getMessage());
-        }
-    }
-
     private void clearForm(ActionEvent actionEvent) {
         this.cboSet.setItems(FXCollections.observableList(new ArrayList<>()));
         this.cboSetType.getSelectionModel().clearSelection();
-    }
-
-    private void fillCsvWithPrices(){
-        try{
-            printToLogView("Starting filling process... please wait a few minutes");
-            String filePath = "";
-            List<CSVModel> cardList = csvHelper.csvModelToCardList(filePath);
-
-        } catch (FileNotFoundException e) {
-            showMessage("RIP", "Something happened", "The file could not be found");
-
-            throw new RuntimeException(e);
-        }
-
-
-    }
-
-    private void generateCSV() {
-        try {
-            printToLogView("Starting... please wait a few minutes");
-            String setName = this.cboSet.getValue();
-            String set = this.setMap.get(cboSetType.getValue()).stream().filter(m -> m.getName().equalsIgnoreCase(setName)).findFirst().get().getCode();
-            List<Card> cardsList = scryfallHelper.getCardsFromJsonURL(scryfallHelper.getAllCardsURL(), set);
-            if (!cardsList.isEmpty()) {
-                Map<String, String> cardNames;
-                if(this.chkUploadImages.isSelected()){
-                    printToLogView("Generating images...");
-                    printToLogView("getting " + cardsList.size() + " cards images");
-                    cardNames = scryfallHelper.getOracleCardsImages(cardsList);
-                    printToLogView("processing card images");
-                    cardImageHelper.createJumpsellerImages(cardNames);
-                    printToLogView("uploading jumpseller images to image server");
-                    ftpHelper.uploadImages(cardNames, this.txtImgBBKey.getText());
-                    printToLogView("updating csv file with card images urls");
-                    csvHelper.updateImagesUris(cardsList, cardNames);
-                }
-                if(chkAddPrices.isSelected()){
-                    List<cl.rivendel.csv.model.mtgjson.Card> cards = mtgJsonHelper.getCardsFromSetJSON(set);
-                    mtgJsonHelper.replaceUUID(cardsList, cards);
-                    Map<String, Float> cardPrices = mtgJsonHelper.getCardPrices();
-                    mtgJsonHelper.mergePrices(cardsList, cardPrices, Integer.parseInt(this.txtValorDolar.getText()));
-                    printToLogView("Cantidad de cartas con precio recuperadas: "+cards.size());
-                }
-                printToLogView("creating csv models");
-                List<CSVModel> listCSVModel = csvHelper.cardListToCsvModelList(cardsList);
-                printToLogView("creating jumpseller csv file");
-                csvHelper.generateJumpSellerCSV(listCSVModel, "." + File.separator + cardsList.get(0).getSet() + "-list.csv");
-                printToLogView("File name: "+cardsList.get(0).getSet() + "-list.csv");
-            }
-            printToLogView("CSV File generation finished! :D");
-
-        } catch (Exception e){
-            showMessage("RIP", "Something happened", "Something exploded while trying to generate the file");
-            throw new RuntimeException(e);
-        }
     }
 
     private ObservableList<String> prepareSetTypeList() {
@@ -245,12 +186,6 @@ public class SimpleUIController {
             ));
         else
             return FXCollections.observableList(new ArrayList<>());
-    }
-
-    private void printToLogView(String logString){
-        log.info(logString);
-
-        //this.txtLog.appendText(logString+"\n");
     }
 
     private void showMessage(String title, String header, String message){

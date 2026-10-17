@@ -85,7 +85,6 @@ public class ImgBBFtpHelper implements FTPClient {
                 log.trace("new value! {}", returnValue);
 
             } else {
-                //TODO: Keep file name so it can be uploaded later or implement a retry mechanism
                 log.error("Non 200 response from ftp service: {} {}", response2.getCode(), response2.getReasonPhrase());
                 retries++;
                 uploadImage(base64Image, imgName, imgBBApiKey, retries);
